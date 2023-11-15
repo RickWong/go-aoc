@@ -59,6 +59,7 @@ task build
 - Golang postfix code completion
 - Go Snippets
 - Tabnine AI
+- Task (official)
 
 ## License
 
