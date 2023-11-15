@@ -1,0 +1,49 @@
+version: '3'
+
+dotenv: [.env]
+interval: 300ms
+
+tasks:
+  format:
+    run: when_changed
+    cmds:
+      - go fmt ./...
+
+  lint:
+    run: when_changed
+    requires:
+      vars: [APP_ENV]
+    cmds:
+      - go vet ./...
+
+  audit:
+    run: when_changed
+    deps: [not_implemented]
+
+  run:
+    cmds: 
+      - task: test
+
+  dev:
+    sources: ["**/*.go"]
+    watch: true
+    cmds: 
+      - task: devtest
+
+  test:
+    cmds:
+      - go test ./...
+
+  devtest:
+    sources: ["**/*.go"]
+    watch: true
+    cmds:
+      - go test ./...
+
+  coverage:
+    deps: [format, lint, test]
+    cmds:
+      - go test ./... -coverprofile .coverage.out     
+
+  build:
+    deps: [format, lint, test, coverage]

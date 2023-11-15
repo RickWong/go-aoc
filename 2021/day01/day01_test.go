@@ -1,4 +1,4 @@
-package main
+package day01
 
 import (
 	_ "embed"
@@ -7,23 +7,26 @@ import (
 	"testing"
 )
 
-//go:embed examples/day01.txt
+//go:embed example.txt
 var example string
 
-//go:embed inputs/day01.txt
+//go:embed input.txt
 var input string
 
 var data = input
 
 func part1() int {
-	count := 0
 	lines := strings.Split(data, "\n")
 
-	for i := 1; i < len(lines); i++ {
-		prev, _ := strconv.Atoi(lines[i-1])
-		curr, _ := strconv.Atoi(lines[i])
+	nums := make([]int, len(lines))
+	for i, line := range lines {
+		nums[i], _ = strconv.Atoi(line)
+	}
 
-		if curr > prev {
+	count := 0
+
+	for i := 1; i < len(nums); i++ {
+		if nums[i] > nums[i-1] {
 			count++
 		}
 	}
@@ -44,20 +47,23 @@ func TestPart1(t *testing.T) {
 	}
 }
 
+func BenchmarkPart1(b *testing.B) {
+	part1()
+}
+
 func part2() int {
-	count := 0
 	lines := strings.Split(data, "\n")
 
-	for i := 3; i < len(lines); i++ {
-		a1, _ := strconv.Atoi(lines[i-3])
-		a2, _ := strconv.Atoi(lines[i-2])
-		a3, _ := strconv.Atoi(lines[i-1])
-		a := a1 + a2 + a3
-		b1 := a2
-		b2 := a3
-		b3, _ := strconv.Atoi(lines[i])
-		b := b1 + b2 + b3
+	nums := make([]int, len(lines))
+	for i, line := range lines {
+		nums[i], _ = strconv.Atoi(line)
+	}
 
+	count := 0
+
+	for i := 3; i < len(nums); i++ {
+		a := nums[i-3] + nums[i-2] + nums[i-1]
+		b := nums[i-2] + nums[i-1] + nums[i]
 		if b > a {
 			count++
 		}
@@ -77,4 +83,8 @@ func TestPart2(t *testing.T) {
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
+}
+
+func BenchmarkPart2(b *testing.B) {
+	part2()
 }
