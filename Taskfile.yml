@@ -7,14 +7,14 @@ tasks:
   format:
     run: when_changed
     cmds:
-      - go fmt ./...
+      - go fmt -v ./...
 
   lint:
     run: when_changed
     requires:
       vars: [APP_ENV]
     cmds:
-      - go vet ./...
+      - go vet -v ./...
 
   audit:
     run: when_changed
@@ -32,18 +32,18 @@ tasks:
 
   test:
     cmds:
-      - go test ./...
+      - gotest -v ./...
 
   devtest:
     sources: ["**/*.go"]
     watch: true
     cmds:
-      - go test ./...
+      - gotest -v ./...
 
   coverage:
     deps: [format, lint, test]
     cmds:
-      - go test ./... -coverprofile .coverage.out     
+      - gotest -v ./... -coverprofile .coverage.out     
 
   build:
     deps: [format, lint, test, coverage]

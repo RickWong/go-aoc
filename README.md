@@ -14,6 +14,9 @@ go install github.com/go-task/task/v3/cmd/task@latest
 # install go-releaser
 go install github.com/goreleaser/goreleaser@latest
 
+# install gotest for colorized test output
+go install github.com/rakyll/gotest
+
 # build project
 task build
 ```
