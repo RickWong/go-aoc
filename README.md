@@ -55,14 +55,19 @@ task audit
 task build
 ```
 
-## VS Code
+## VS Code extensions
 
-- DotENV
 - Go (official)
 - Golang postfix code completion
 - Go Snippets
 - Tabnine AI
 - Task (official)
+
+## GoLand plugins
+
+- GitHub Copilot
+- Rainbow Brackets
+- Tabnine AI
 
 ## License
 

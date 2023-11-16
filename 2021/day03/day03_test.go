@@ -17,8 +17,8 @@ var data = input
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	gamma_str := ""
-	epsilon_str := ""
+	gammaStr := ""
+	epsilonStr := ""
 
 	for i := 0; i < len(lines[0]); i++ {
 		bits := ""
@@ -27,16 +27,16 @@ func part1() int {
 		}
 
 		if strings.Count(bits, "0") > strings.Count(bits, "1") {
-			gamma_str += "0"
-			epsilon_str += "1"
+			gammaStr += "0"
+			epsilonStr += "1"
 		} else {
-			gamma_str += "1"
-			epsilon_str += "0"
+			gammaStr += "1"
+			epsilonStr += "0"
 		}
 	}
 
-	gamma, _ := strconv.ParseInt(gamma_str, 2, 0)
-	epsilon, _ := strconv.ParseInt(epsilon_str, 2, 0)
+	gamma, _ := strconv.ParseInt(gammaStr, 2, 0)
+	epsilon, _ := strconv.ParseInt(epsilonStr, 2, 0)
 	return int(gamma * epsilon)
 }
 
@@ -52,10 +52,6 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func BenchmarkPart1(b *testing.B) {
-	part1()
-}
-
 func filter[T any](ss []T, test func(T) bool) (ret []T) {
 	for _, s := range ss {
 		if test(s) {
@@ -69,8 +65,8 @@ func part2() int {
 	lines := strings.Split(strings.Trim(data, "\n\r "), "\n")
 	lines2 := make([]string, len(lines))
 	copy(lines2, lines)
-	o2_str := ""
-	co2_str := ""
+	o2Str := ""
+	co2Str := ""
 
 	for i := 0; len(lines) > 0 && i < len(lines[0]); i++ {
 		bits := ""
@@ -79,12 +75,12 @@ func part2() int {
 		}
 
 		if strings.Count(bits, "0") > strings.Count(bits, "1") {
-			o2_str += "0"
+			o2Str += "0"
 			lines = filter(lines, func(line string) bool {
 				return line[i] == '0'
 			})
 		} else {
-			o2_str += "1"
+			o2Str += "1"
 			lines = filter(lines, func(line string) bool {
 				return line[i] == '1'
 			})
@@ -111,14 +107,12 @@ func part2() int {
 	if len(lines2) < 1 {
 		panic("Out of lines")
 	} else {
-		co2_str = lines2[0]
+		co2Str = lines2[0]
 	}
 
-	o2, _ := strconv.ParseInt(o2_str, 2, 0)
-	co2, _ := strconv.ParseInt(co2_str, 2, 0)
+	o2, _ := strconv.ParseInt(o2Str, 2, 0)
+	co2, _ := strconv.ParseInt(co2Str, 2, 0)
 	return int(o2 * co2)
-
-	return -1
 }
 
 func TestPart2(t *testing.T) {
@@ -132,8 +126,4 @@ func TestPart2(t *testing.T) {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
 
-}
-
-func BenchmarkPart2(b *testing.B) {
-	part2()
 }

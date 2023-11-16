@@ -47,10 +47,6 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func BenchmarkPart1(b *testing.B) {
-	part1()
-}
-
 func part2() int {
 	lines := strings.Split(data, "\n")
 
@@ -83,8 +79,4 @@ func TestPart2(t *testing.T) {
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
-}
-
-func BenchmarkPart2(b *testing.B) {
-	part2()
 }

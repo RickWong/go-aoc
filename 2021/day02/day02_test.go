@@ -23,7 +23,10 @@ func part1() int {
 	for _, line := range lines {
 		var direction string
 		var steps int
-		fmt.Sscanf(line, "%s %d", &direction, &steps)
+		_, err := fmt.Sscanf(line, "%s %d", &direction, &steps)
+		if err != nil {
+			return -1
+		}
 
 		switch direction {
 		case "forward":
@@ -49,10 +52,6 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func BenchmarkPart1(b *testing.B) {
-	part1()
-}
-
 func part2() int {
 	lines := strings.Split(data, "\n")
 	x := 0
@@ -62,7 +61,10 @@ func part2() int {
 	for _, line := range lines {
 		var direction string
 		var steps int
-		fmt.Sscanf(line, "%s %d", &direction, &steps)
+		_, err := fmt.Sscanf(line, "%s %d", &direction, &steps)
+		if err != nil {
+			return -1
+		}
 
 		switch direction {
 		case "forward":
@@ -88,8 +90,4 @@ func TestPart2(t *testing.T) {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
 
-}
-
-func BenchmarkPart2(b *testing.B) {
-	part2()
 }
