@@ -14,8 +14,11 @@ go install github.com/go-task/task/v3/cmd/task@latest
 # install go-releaser
 go install github.com/goreleaser/goreleaser@latest
 
-# install gotest for colorized test output
+# install gotest 
 go install github.com/rakyll/gotest
+
+# install gobench
+go install github.com/gobench-io/gobench@master
 
 # build project
 task build
