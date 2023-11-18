@@ -96,16 +96,19 @@ func part2() int {
 		for len(queue) > 0 {
 			current := queue[0]
 			queue = queue[1:]
+			if slices.Contains(visited, current) {
+				continue
+			}
 			visited = append(visited, current)
 
 			for _, neighbor := range current.neighbors {
-				if neighbor.height < 9 && !slices.Contains(visited, neighbor) {
+				if neighbor.height < 9 {
 					queue = append(queue, neighbor)
 				}
 			}
 		}
 
-		basinSizes = append(basinSizes, len(lo.Uniq(visited)))
+		basinSizes = append(basinSizes, len(visited))
 	}
 
 	slices.Sort(basinSizes)
