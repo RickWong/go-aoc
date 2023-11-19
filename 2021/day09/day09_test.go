@@ -22,7 +22,13 @@ type Point struct {
 	neighbors []*Point
 }
 
-func parseHeights(lines []string) (points []*Point) {
+func parseHeights(lines []string) []*Point {
+	if lines == nil {
+		panic("No data")
+	}
+
+	points := make([]*Point, 0)
+
 	for _, line := range lines {
 		for _, heightStr := range line {
 			height, _ := strconv.Atoi(string(heightStr))
@@ -30,6 +36,7 @@ func parseHeights(lines []string) (points []*Point) {
 			points = append(points, &point)
 		}
 	}
+
 	for y, line := range lines {
 		for x, _ := range line {
 			point := points[y*len(line)+x]
@@ -48,6 +55,7 @@ func parseHeights(lines []string) (points []*Point) {
 			}
 		}
 	}
+
 	return points
 }
 

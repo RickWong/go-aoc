@@ -21,6 +21,10 @@ func part1() int {
 }
 
 func readData(lines []string) []int {
+	if lines == nil {
+		panic("No data")
+	}
+	
 	numsStr := strings.Split(lines[0], ",")
 	nums := make([]int, 0, len(numsStr))
 	for i := range numsStr {

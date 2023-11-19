@@ -17,6 +17,10 @@ var data = input
 
 func part1() int {
 	lines := strings.Split(data, "\n")
+	if lines == nil {
+		panic("No data")
+	}
+
 	gammaStr := ""
 	epsilonStr := ""
 

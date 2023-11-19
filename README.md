@@ -20,6 +20,9 @@ go install github.com/rakyll/gotest
 # install gobench
 go install github.com/gobench-io/gobench@master
 
+# install nilaway
+go install go.uber.org/nilaway/cmd/nilaway@latest
+
 # build project
 task build
 ```

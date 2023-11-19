@@ -16,6 +16,12 @@ tasks:
     cmds:
       - go vet -v ./...
 
+  typecheck:
+    run: when_changed
+    cmds:
+      - nilaway ./...
+
+
   audit:
     run: when_changed
     deps: [not_implemented]

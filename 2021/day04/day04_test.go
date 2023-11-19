@@ -64,6 +64,10 @@ out:
 }
 
 func parseData(lines []string) ([]string, []Board) {
+	if lines == nil {
+		panic("No data")
+	}
+
 	drawnNumbers := strings.Split(lines[0], ",")
 	boards := make([]Board, 0)
 	board := Board{}
