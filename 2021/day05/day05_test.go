@@ -9,7 +9,7 @@ import (
 )
 
 //go:embed example.txt
-var example string
+var Example string
 
 //go:embed input.txt
 var input string

@@ -10,7 +10,7 @@ import (
 )
 
 //go:embed example.txt
-var example string
+var Example string
 
 //go:embed input.txt
 var input string
@@ -38,7 +38,7 @@ func parseHeights(lines []string) []*Point {
 	}
 
 	for y, line := range lines {
-		for x, _ := range line {
+		for x := range line {
 			point := points[y*len(line)+x]
 
 			if y > 0 {

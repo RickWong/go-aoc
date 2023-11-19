@@ -7,20 +7,20 @@ tasks:
   format:
     run: when_changed
     cmds:
-      - go fmt -v ./...
+      - go fmt ./...
 
   lint:
     run: when_changed
     requires:
       vars: [APP_ENV]
     cmds:
-      - go vet -v ./...
+      - go vet ./...
+      - golangci-lint run ./...
 
   typecheck:
     run: when_changed
     cmds:
       - nilaway ./...
-
 
   audit:
     run: when_changed
