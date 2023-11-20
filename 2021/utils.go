@@ -42,23 +42,17 @@ func IterativeSearch[T any](
 	heap := heap2.New(lessFn)
 	beam := heap2.New(lessFn)
 
-	var bestBranch *T
-	bestWeight := math.Inf(1)
-
 	var trail = make(map[any]*T)
 	var weights = make(map[any]float64)
+	bestWeight := math.Inf(1)
 
 	heap.Push(heapItem[T]{0, 0, start})
 	for heap.Size() > 0 {
 		result.Iterations++
 		current, _ := heap.Pop()
 
-		if current.weight >= bestWeight {
-			continue
-		}
-
 		if predicateFn(current.branch) {
-			bestBranch = current.branch
+			result.Best = current.branch
 			bestWeight = current.weight
 			break
 		}
@@ -69,13 +63,18 @@ func IterativeSearch[T any](
 				weight += weightFn(branch)
 			}
 
+			if weight >= bestWeight {
+				continue
+			}
+
 			var id any
 			if identityFn != nil {
 				id = identityFn(branch)
 			}
 
 			if id != nil {
-				if weight < weights[id] {
+				knownWeight, known := weights[id]
+				if known && weight >= knownWeight {
 					continue
 				}
 
@@ -106,9 +105,9 @@ func IterativeSearch[T any](
 		}
 	}
 
-	if bestBranch != nil {
-		result.Path = append(result.Path, bestBranch)
-		nextStep := bestBranch
+	if result.Best != nil {
+		result.Path = append(result.Path, result.Best)
+		nextStep := result.Best
 		for nextStep != nil {
 			nextStep = trail[identityFn(nextStep)]
 			result.Path = append(result.Path, nextStep)
