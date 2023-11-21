@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	heap2 "github.com/zyedidia/generic/heap"

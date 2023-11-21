@@ -2,7 +2,7 @@ package day15
 
 import (
 	_ "embed"
-	utils "github.com/RickWong/go-aoc/2021"
+	utils "github.com/RickWong/go-aoc/2021/common"
 	"github.com/samber/lo"
 	"math"
 	"strconv"
