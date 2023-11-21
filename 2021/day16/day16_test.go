@@ -124,8 +124,6 @@ func decodePacket(packet string, offset *int) *Packet {
 			subpackets,
 		}
 	}
-
-	panic("unreachable")
 }
 
 func TestPart1(t *testing.T) {

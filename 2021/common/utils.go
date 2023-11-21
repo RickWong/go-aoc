@@ -2,7 +2,6 @@ package common
 
 import (
 	heap2 "github.com/zyedidia/generic/heap"
-	"math"
 	"slices"
 	"time"
 )
@@ -44,7 +43,6 @@ func IterativeSearch[T any](
 
 	var trail = make(map[any]*T)
 	var weights = make(map[any]float64)
-	bestWeight := math.Inf(1)
 
 	heap.Push(heapItem[T]{0, 0, start})
 	for heap.Size() > 0 {
@@ -53,7 +51,6 @@ func IterativeSearch[T any](
 
 		if predicateFn(current.branch) {
 			result.Best = current.branch
-			bestWeight = current.weight
 			break
 		}
 
@@ -61,10 +58,6 @@ func IterativeSearch[T any](
 			weight := current.weight
 			if weightFn != nil {
 				weight += weightFn(branch)
-			}
-
-			if weight >= bestWeight {
-				continue
 			}
 
 			var id any
