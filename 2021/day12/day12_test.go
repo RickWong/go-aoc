@@ -3,7 +3,6 @@ package day12
 import (
 	_ "embed"
 	utils "github.com/RickWong/go-aoc/2021/common"
-	"maps"
 	"strings"
 	"testing"
 	"unicode"
@@ -18,14 +17,21 @@ var Input string
 var data = Input
 
 type Cave struct {
-	id      string
-	tunnels []string
+	name    string
+	id      int64
+	tunnels []*Cave
 }
 
 type Route struct {
-	cave    *Cave
-	visited map[string]int
-	twice   bool
+	cave         *Cave
+	visitedOnce  int64
+	visitedTwice int64
+}
+
+func BenchmarkPart1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part1()
+	}
 }
 
 func part1() int {
@@ -34,32 +40,29 @@ func part1() int {
 	ends := 0
 
 	utils.IterativeSearch(
-		&Route{caves["start"], map[string]int{"start": 1}, false},
+		&Route{caves["start"], caves["start"].id, 0},
 		func(current *Route) []*Route {
-			var nextCaves []*Route
-			for _, id := range current.cave.tunnels {
-				if id == "start" {
+			routes := make([]*Route, 0, len(current.cave.tunnels))
+			for _, next := range current.cave.tunnels {
+				if next.name == "start" {
 					continue
 				}
 
-				if id == "end" {
+				if next.name == "end" {
 					ends++
 					continue
 				}
 
-				if unicode.IsUpper(([]rune(id))[0]) ||
-					current.visited[id] < 1 {
-					visited := make(map[string]int, len(current.visited))
-					maps.Copy(visited, current.visited)
-					visited[id] = visited[id] + 1
-
-					nextCaves = append(
-						nextCaves,
-						&Route{caves[id], visited, false},
+				if current.visitedOnce&current.cave.id == 0 || unicode.
+					IsUpper(([]rune(next.name))[0]) {
+					routes = append(
+						routes,
+						&Route{next, current.visitedOnce | current.cave.
+							id, current.visitedTwice},
 					)
 				}
 			}
-			return nextCaves
+			return routes
 		},
 		func(current *Route) bool { return false },
 		nil,
@@ -76,27 +79,28 @@ func parseCaves(lines []string) map[string]*Cave {
 		panic("No data")
 	}
 
-	caves := make(map[string]*Cave)
+	caves := make(map[string]*Cave, len(lines))
 
-	for _, line := range lines {
+	for idx, line := range lines {
 		path := strings.Split(line, "-")
 		if path == nil {
 			panic("Invalid")
 		}
 
-		id := path[0]
-		nextCave := path[1]
+		id := int64(1 << idx)
+		current := path[0]
+		next := path[1]
 
-		if caves[id] == nil {
-			caves[id] = &Cave{id, nil}
+		if caves[current] == nil {
+			caves[current] = &Cave{current, id, nil}
 		}
-		caves[id].tunnels = append(caves[id].tunnels, nextCave)
 
-		if caves[nextCave] == nil {
-			caves[nextCave] = &Cave{nextCave, nil}
+		if caves[next] == nil {
+			caves[next] = &Cave{next, id, nil}
 		}
-		caves[nextCave].tunnels = append(caves[nextCave].tunnels, id)
 
+		caves[current].tunnels = append(caves[current].tunnels, caves[next])
+		caves[next].tunnels = append(caves[next].tunnels, caves[current])
 	}
 	return caves
 }
@@ -119,36 +123,37 @@ func part2() int {
 	ends := 0
 
 	utils.IterativeSearch(
-		&Route{caves["start"], map[string]int{"start": 1}, false},
+		&Route{caves["start"], caves["start"].id, 0},
 		func(current *Route) []*Route {
-			var nextCaves []*Route
-			for _, id := range current.cave.tunnels {
-				if id == "start" {
+			var routes []*Route
+			for _, next := range current.cave.tunnels {
+				if next.name == "start" {
 					continue
 				}
 
-				if id == "end" {
+				if next.name == "end" {
 					ends++
 					continue
 				}
 
-				isSmallCave := unicode.IsLower(([]rune(id))[0])
+				isSmallCave := unicode.IsLower(([]rune(next.name))[0])
 
 				if !isSmallCave ||
-					(current.visited[id] == 0) ||
-					(current.visited[id] == 1 && !current.twice) {
-					visited := make(map[string]int, len(current.visited))
-					maps.Copy(visited, current.visited)
-					visited[id]++
-					twice := current.twice || (isSmallCave && visited[id] == 2)
-
-					nextCaves = append(
-						nextCaves,
-						&Route{caves[id], visited, twice},
+					(current.visitedOnce&current.cave.id == 0) ||
+					(current.visitedOnce&current.cave.id == 1 && current.
+						visitedTwice&current.cave.id == 0) {
+					visitedTwice := current.visitedTwice
+					if current.visitedOnce&current.cave.id == 1 {
+						visitedTwice |= current.cave.id
+					}
+					routes = append(
+						routes,
+						&Route{next, current.visitedOnce | current.cave.
+							id, visitedTwice},
 					)
 				}
 			}
-			return nextCaves
+			return routes
 		},
 		func(current *Route) bool { return false },
 		nil,
