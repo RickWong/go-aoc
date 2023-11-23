@@ -53,18 +53,19 @@ func part1() int {
 					continue
 				}
 
-				if current.visitedOnce&current.cave.id == 0 || unicode.
-					IsUpper(([]rune(next.name))[0]) {
+				if current.visitedOnce&current.cave.id == 0 ||
+					(next.name[0] >= 65 && next.name[0] <= 90) {
 					routes = append(
 						routes,
-						&Route{next, current.visitedOnce | current.cave.
-							id, current.visitedTwice},
+						&Route{next,
+							current.visitedOnce | current.cave.id,
+							current.visitedTwice},
 					)
 				}
 			}
 			return routes
 		},
-		func(current *Route) bool { return false },
+		nil,
 		nil,
 		nil,
 		nil,
@@ -155,7 +156,7 @@ func part2() int {
 			}
 			return routes
 		},
-		func(current *Route) bool { return false },
+		nil,
 		nil,
 		nil,
 		nil,

@@ -52,7 +52,7 @@ func IterativeSearch[T any](
 		result.Iterations++
 		current, _ := heap.Pop()
 
-		if predicateFn(current.branch) {
+		if predicateFn != nil && predicateFn(current.branch) {
 			result.Best = current.branch
 			break
 		}
