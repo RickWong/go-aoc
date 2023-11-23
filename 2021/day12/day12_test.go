@@ -5,7 +5,6 @@ import (
 	utils "github.com/RickWong/go-aoc/2021/common"
 	"strings"
 	"testing"
-	"unicode"
 )
 
 //go:embed example.txt
@@ -23,15 +22,9 @@ type Cave struct {
 }
 
 type Route struct {
-	cave         *Cave
-	visitedOnce  int64
-	visitedTwice int64
-}
-
-func BenchmarkPart1(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		part1()
-	}
+	cave    *Cave
+	visited int64
+	twice   bool
 }
 
 func part1() int {
@@ -40,7 +33,7 @@ func part1() int {
 	ends := 0
 
 	utils.IterativeSearch(
-		&Route{caves["start"], caves["start"].id, 0},
+		&Route{caves["start"], caves["start"].id, false},
 		func(current *Route) []*Route {
 			routes := make([]*Route, 0, len(current.cave.tunnels))
 			for _, next := range current.cave.tunnels {
@@ -53,13 +46,13 @@ func part1() int {
 					continue
 				}
 
-				if current.visitedOnce&current.cave.id == 0 ||
-					(next.name[0] >= 65 && next.name[0] <= 90) {
+				if isUpper(next.name[0]) ||
+					current.visited&next.id == 0 {
 					routes = append(
 						routes,
 						&Route{next,
-							current.visitedOnce | current.cave.id,
-							current.visitedTwice},
+							current.visited | next.id,
+							false},
 					)
 				}
 			}
@@ -75,13 +68,17 @@ func part1() int {
 	return ends
 }
 
+func isUpper(c uint8) bool {
+	return c >= 65 && c <= 90
+}
+
 func parseCaves(lines []string) map[string]*Cave {
 	if lines == nil {
 		panic("No data")
 	}
 
 	caves := make(map[string]*Cave, len(lines))
-	id := int64(0)
+	id := int64(1)
 
 	for _, line := range lines {
 		seperatorIdx := strings.Index(line, "-")
@@ -89,13 +86,13 @@ func parseCaves(lines []string) map[string]*Cave {
 		next := line[seperatorIdx+1:]
 
 		if caves[current] == nil {
-			caves[current] = &Cave{current, id, make([]*Cave, 0, 4)}
-			id++
+			caves[current] = &Cave{current, id, make([]*Cave, 0, 6)}
+			id <<= 1
 		}
 
 		if caves[next] == nil {
-			caves[next] = &Cave{next, id, make([]*Cave, 0, 4)}
-			id++
+			caves[next] = &Cave{next, id, make([]*Cave, 0, 6)}
+			id <<= 1
 		}
 
 		caves[current].tunnels = append(caves[current].tunnels, caves[next])
@@ -122,9 +119,9 @@ func part2() int {
 	ends := 0
 
 	utils.IterativeSearch(
-		&Route{caves["start"], caves["start"].id, 0},
+		&Route{caves["start"], caves["start"].id, false},
 		func(current *Route) []*Route {
-			var routes []*Route
+			routes := make([]*Route, 0, len(current.cave.tunnels))
 			for _, next := range current.cave.tunnels {
 				if next.name == "start" {
 					continue
@@ -135,20 +132,18 @@ func part2() int {
 					continue
 				}
 
-				isSmallCave := unicode.IsLower(([]rune(next.name))[0])
-
-				if !isSmallCave ||
-					(current.visitedOnce&current.cave.id == 0) ||
-					(current.visitedOnce&current.cave.id == 1 && current.
-						visitedTwice&current.cave.id == 0) {
-					visitedTwice := current.visitedTwice
-					if current.visitedOnce&current.cave.id == 1 {
-						visitedTwice |= current.cave.id
-					}
+				isBigCave := isUpper(next.name[0])
+				if isBigCave ||
+					current.visited&next.id == 0 ||
+					!current.twice {
 					routes = append(
 						routes,
-						&Route{next, current.visitedOnce | current.cave.
-							id, visitedTwice},
+						&Route{
+							next,
+							current.visited | next.id,
+							current.twice || (!isBigCave &&
+								current.visited&next.id != 0),
+						},
 					)
 				}
 			}
@@ -173,5 +168,17 @@ func TestPart2(t *testing.T) {
 
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
+	}
+}
+
+func BenchmarkPart1(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part1()
+	}
+}
+
+func BenchmarkPart2(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part2()
 	}
 }
