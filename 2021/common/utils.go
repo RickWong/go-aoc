@@ -37,14 +37,17 @@ func IterativeSearch[T any](
 	result := &SearchResult[T]{nil, nil, 0, 0}
 	now := time.Now().UnixMilli()
 
-	lessFn := func(a heapItem[T], b heapItem[T]) bool { return a.priority < b.priority }
+	lessFn := func(a *heapItem[T], b *heapItem[T]) bool {
+		return a.
+			priority < b.priority
+	}
 	heap := heap2.New(lessFn)
 	beam := heap2.New(lessFn)
 
-	var trail = make(map[any]*T)
-	var weights = make(map[any]float64)
+	var trail = make(map[any]*T, 32)
+	var weights = make(map[any]float64, 32)
 
-	heap.Push(heapItem[T]{0, 0, start})
+	heap.Push(&heapItem[T]{0, 0, start})
 	for heap.Size() > 0 {
 		result.Iterations++
 		current, _ := heap.Pop()
@@ -81,7 +84,7 @@ func IterativeSearch[T any](
 			}
 
 			if beamWidth == 0 {
-				heap.Push(heapItem[T]{priority, weight, branch})
+				heap.Push(&heapItem[T]{priority, weight, branch})
 				continue
 			}
 
@@ -89,7 +92,7 @@ func IterativeSearch[T any](
 				beam.Pop()
 			}
 
-			beam.Push(heapItem[T]{priority, weight, branch})
+			beam.Push(&heapItem[T]{priority, weight, branch})
 		}
 
 		for beam.Size() > 0 {
