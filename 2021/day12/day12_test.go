@@ -81,23 +81,21 @@ func parseCaves(lines []string) map[string]*Cave {
 	}
 
 	caves := make(map[string]*Cave, len(lines))
+	id := int64(0)
 
-	for idx, line := range lines {
-		path := strings.Split(line, "-")
-		if path == nil {
-			panic("Invalid")
-		}
-
-		id := int64(1 << idx)
-		current := path[0]
-		next := path[1]
+	for _, line := range lines {
+		seperatorIdx := strings.Index(line, "-")
+		current := line[0:seperatorIdx]
+		next := line[seperatorIdx+1:]
 
 		if caves[current] == nil {
-			caves[current] = &Cave{current, id, nil}
+			caves[current] = &Cave{current, id, make([]*Cave, 0, 4)}
+			id++
 		}
 
 		if caves[next] == nil {
-			caves[next] = &Cave{next, id, nil}
+			caves[next] = &Cave{next, id, make([]*Cave, 0, 4)}
+			id++
 		}
 
 		caves[current].tunnels = append(caves[current].tunnels, caves[next])
