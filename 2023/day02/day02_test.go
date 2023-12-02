@@ -2,7 +2,7 @@ package day02
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
+	"regexp"
 	"strconv"
 	"strings"
 	"testing"
@@ -14,68 +14,36 @@ var Example string
 //go:embed input.txt
 var Input string
 
-var data = Input
+var data = Example
 
-type Game struct {
-	id   int
-	sets []GameSet
+func atoi(s *string) int {
+	v, _ := strconv.Atoi(*s)
+	return v
 }
-
-type GameSet map[string]int
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	games := parseGames(lines)
+	r := regexp.MustCompile(`(\d+) (\w+)`)
 	sum := 0
-	maxPossible := GameSet{
-		"red":   12,
-		"green": 13,
-		"blue":  14,
-	}
 
-	for _, game := range *games {
-		isPossible := lo.EveryBy(game.sets, func(set GameSet) bool {
-			for color, num := range set {
-				if num > maxPossible[color] {
-					return false
-				}
+outer:
+	for i, line := range lines {
+		draws := r.FindAllStringSubmatch(line, -1)
+
+		for _, draw := range draws {
+			count, color := draw[1], draw[2]
+			switch {
+			case color == "red" && atoi(&count) > 12,
+				color == "green" && atoi(&count) > 13,
+				color == "blue" && atoi(&count) > 14:
+				continue outer
 			}
-
-			return true
-		})
-
-		if isPossible {
-			sum += game.id
 		}
+
+		sum += i + 1
 	}
 
 	return sum
-}
-
-func parseGames(lines []string) *[]Game {
-	games := make([]Game, len(lines))
-
-	for i, line := range lines {
-		parts := strings.Split(line, ": ")
-		games[i].id, _ = strconv.Atoi(parts[0][5:len(parts[0])])
-
-		sets := strings.Split(parts[1], ";")
-		games[i].sets = make([]GameSet, len(sets))
-
-		for j, set := range sets {
-			colorCubes := strings.Split(set, ", ")
-			games[i].sets[j] = make(GameSet, len(colorCubes))
-
-			for _, colorCube := range colorCubes {
-				info := strings.Fields(colorCube)
-				num, _ := strconv.Atoi(info[0])
-				color := info[1]
-				games[i].sets[j][color] = num
-			}
-		}
-	}
-
-	return &games
 }
 
 func TestPart1(t *testing.T) {
@@ -92,36 +60,22 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	games := parseGames(lines)
+	r := regexp.MustCompile(`(\d+) (\w+)`)
 	sum := 0
 
-	for _, game := range *games {
-		maxima := make(GameSet)
+	for _, line := range lines {
+		maxes := make(map[string]int)
+		draws := r.FindAllStringSubmatch(line, -1)
 
-		for _, set := range game.sets {
-			for color, num := range set {
-				currentMaximum, ok := maxima[color]
-				if !ok {
-					maxima[color] = num
-				} else {
-					maxima[color] = max(currentMaximum, num)
-				}
-			}
+		for _, draw := range draws {
+			count, color := draw[1], draw[2]
+			maxes[color] = max(maxes[color], atoi(&count))
 		}
 
-		power := multiply(lo.Values(maxima))
-		sum += power
+		sum += maxes["red"] * maxes["green"] * maxes["blue"]
 	}
 
 	return sum
-}
-
-func multiply(v []int) int {
-	result := v[0]
-	for i := 1; i < len(v); i++ {
-		result *= v[i]
-	}
-	return result
 }
 
 func TestPart2(t *testing.T) {
