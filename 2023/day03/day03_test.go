@@ -39,6 +39,13 @@ func part1() int {
 	lines := strings.Split(data, "\n")
 	sum := 0
 
+	// Researched how to do this with multiline regexp.
+	// Below will return all numbers and their start & end indices,
+	// then those indices would need to be divided & modulo-ed by the line width.
+	//
+	//   r := regexp.MustCompile(`(?m)\d+`)
+	//   m := r.FindAllStringIndex(multi, -1)
+
 	numbers := make([]Number, 0, 100)
 	for y, line := range lines {
 		parsed := ""
