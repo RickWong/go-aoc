@@ -14,7 +14,7 @@ var Example string
 //go:embed input.txt
 var Input string
 
-var data = Example
+var data = Input
 
 func atoi(s *string) int {
 	v, _ := strconv.Atoi(*s)
