@@ -54,10 +54,8 @@ func part2() int {
 		winners, numbers := strings.Fields(m[1]), strings.Fields(m[2])
 		numWinners := len(lo.Intersect(winners, numbers))
 
-		for j := 0; j < copies[i]; j++ {
-			for k := 0; k < numWinners; k++ {
-				copies[i+k+1]++
-			}
+		for k := 0; k < numWinners; k++ {
+			copies[i+k+1] += copies[i]
 		}
 	}
 
