@@ -24,6 +24,7 @@ func part1() int {
 	for _, m := range matches {
 		winners, numbers := strings.Fields(m[1]), strings.Fields(m[2])
 		numWinners := len(lo.Intersect(winners, numbers))
+		
 		sum += (1 << numWinners) >> 1
 	}
 
@@ -47,10 +48,9 @@ func part2() int {
 	matches := re.FindAllStringSubmatch(data, -1)
 	copies := make([]int, len(matches))
 
-	for i := 0; i < len(matches); i++ {
+	for i, m := range matches {
 		copies[i]++
 
-		m := matches[i]
 		winners, numbers := strings.Fields(m[1]), strings.Fields(m[2])
 		numWinners := len(lo.Intersect(winners, numbers))
 
