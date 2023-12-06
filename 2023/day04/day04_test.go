@@ -24,7 +24,7 @@ func part1() int {
 	for _, m := range matches {
 		winners, numbers := strings.Fields(m[1]), strings.Fields(m[2])
 		numWinners := len(lo.Intersect(winners, numbers))
-		
+
 		sum += (1 << numWinners) >> 1
 	}
 
