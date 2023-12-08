@@ -2,8 +2,6 @@ package day01
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -16,26 +14,37 @@ var Input string
 
 var data = Input
 
-func calibrate(s *string) int {
-	firstIndex := strings.IndexAny(*s, "0123456789")
-	lastIndex := strings.LastIndexAny(*s, "0123456789")
-	if firstIndex < 0 || lastIndex < 0 {
+func mapFn[T, R any](collection []T, fn func(a T) R) []R {
+	m := make([]R, len(collection))
+	for i, v := range collection {
+		m[i] = fn(v)
+	}
+	return m
+}
+
+func sum(collection []int) int {
+	m := 0
+	for _, v := range collection {
+		m += v
+	}
+	return m
+}
+
+func calibrate(s string) int {
+	first := strings.IndexAny(s, "0123456789")
+	last := strings.LastIndexAny(s, "0123456789")
+	if first < 0 || last < 0 {
 		return -1
 	}
 
-	firstDigit, _ := strconv.Atoi((*s)[firstIndex : firstIndex+1])
-	lastDigit, _ := strconv.Atoi((*s)[lastIndex : lastIndex+1])
-
-	return firstDigit*10 + lastDigit
+	firstDigit := s[first] - '0'
+	lastDigit := s[last] - '0'
+	return int(firstDigit*10 + lastDigit)
 }
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	sum := 0
-	for _, line := range lines {
-		sum += calibrate(&line)
-	}
-	return sum
+	return sum(mapFn(lines, calibrate))
 }
 
 func TestPart1(t *testing.T) {
@@ -50,55 +59,40 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func translate(s *string) {
-	// Can't use strings.Replace (need to keep string order) nor
-	// strings.NewReplacer (cannot replace in reverse order "oneight").
-	// Let's write our own translator.
+func translate(s string) string {
 	replacements := map[string]string{
-		"zero":  "0",
-		"one":   "1",
-		"two":   "2",
-		"three": "3",
-		"four":  "4",
-		"five":  "5",
-		"six":   "6",
-		"seven": "7",
-		"eight": "8",
-		"nine":  "9",
+		"zero":  "z0o",
+		"one":   "o1e",
+		"two":   "t2o",
+		"three": "t3e",
+		"four":  "f4r",
+		"five":  "f5e",
+		"six":   "s6x",
+		"seven": "s7n",
+		"eight": "e8t",
+		"nine":  "n9e",
 	}
 
-first:
-	for i := 0; i < len(*s); i++ {
+	for i := 0; i < len(s); i++ {
 		for needle, replacement := range replacements {
-			nLen := uint(len(needle))
-			if lo.Substring(*s, i, nLen) == needle {
-				rLen := len(replacement)
-				*s = (*s)[0:i] + replacement + (*s)[i+rLen:]
-				break first
+			j := i + len(needle)
+			if j <= len(s) && s[i:j] == needle {
+				s = s[:i] + replacement + s[j:]
+				break
 			}
 		}
 	}
-last:
-	for i := len(*s) - 1; i >= 0; i-- {
-		for needle, replacement := range replacements {
-			nLen := uint(len(needle))
-			if lo.Substring(*s, i, nLen) == needle {
-				rLen := len(replacement)
-				*s = (*s)[0:i] + replacement + (*s)[i+rLen:]
-				break last
-			}
-		}
-	}
+
+	return s
+}
+
+func transform(s string) int {
+	return calibrate(translate(s))
 }
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	sum := 0
-	for _, line := range lines {
-		translate(&line)
-		sum += calibrate(&line)
-	}
-	return sum
+	return sum(mapFn(lines, transform))
 }
 
 func TestPart2(t *testing.T) {
