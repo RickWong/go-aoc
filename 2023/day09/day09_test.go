@@ -3,6 +3,7 @@ package day09
 import (
 	_ "embed"
 	"github.com/stretchr/testify/assert"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -42,27 +43,34 @@ func Every(collection []int, is int) bool {
 
 // Part 1.
 
+func nextIteration(outNumbers *[]int) (last int, done bool) {
+	// Going from right to left. Overwriting the last item.
+	numbers := *outNumbers
+	for i := len(numbers) - 1; i > 0; i-- {
+		numbers[i] = numbers[i] - numbers[i-1]
+	}
+
+	// Trim most-left item to keep items to the right as new iteration.
+	numbers = numbers[1:]
+	*outNumbers = numbers
+
+	return numbers[len(numbers)-1], Every(numbers, 0)
+}
+
 func part1() int {
 	lines := strings.Split(data, "\n")
 	sum := 0
 
 	for _, line := range lines {
 		numbers := Map(strings.Fields(line), Atoi)
+
 		current := numbers
 		sum += current[len(current)-1]
-
 		for {
-			// Going from right to left. Overwriting the last item.
-			for i := len(current) - 1; i > 0; i-- {
-				current[i] = current[i] - current[i-1]
-			}
+			last, done := nextIteration(&current)
+			sum += last
 
-			// Trim most-left item to items to the right as new iteration.
-			current = current[1:]
-
-			sum += current[len(current)-1]
-
-			if Every(current, 0) {
+			if done {
 				break
 			}
 		}
@@ -88,32 +96,21 @@ func part2() int {
 	sum := 0
 
 	for _, line := range lines {
+		// Extrapolating backward is the same as extrapolating forward the reversed sequence.
+		// By reversing the sequence we can reuse the exact logic in part 1.
 		numbers := Map(strings.Fields(line), Atoi)
+		slices.Reverse(numbers)
+
 		current := numbers
-		firsts := []int{current[0]}
-
+		sum += current[len(current)-1]
 		for {
-			// Going from right to left. Overwriting the last item.
-			for i := len(current) - 1; i > 0; i-- {
-				current[i] = current[i] - current[i-1]
-			}
+			last, done := nextIteration(&current)
+			sum += last
 
-			// Trim most-left item to items to the right as new iteration.
-			current = current[1:]
-
-			firsts = append(firsts, current[0])
-
-			if Every(current, 0) {
+			if done {
 				break
 			}
 		}
-
-		first := 0
-		for i := len(firsts) - 1; i > 0; i-- {
-			first = firsts[i-1] - first
-		}
-
-		sum += first
 	}
 
 	return sum
