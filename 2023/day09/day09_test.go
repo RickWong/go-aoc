@@ -31,14 +31,6 @@ func Map[T, R any](collection []T, fn func(a T) R) []R {
 	return m
 }
 
-func Sum(collection []int) int {
-	m := 0
-	for _, v := range collection {
-		m += v
-	}
-	return m
-}
-
 func Every(collection []int, is int) bool {
 	for _, v := range collection {
 		if v != is {
@@ -57,23 +49,23 @@ func part1() int {
 	for _, line := range lines {
 		numbers := Map(strings.Fields(line), Atoi)
 		current := numbers
-		lasts := []int{current[len(current)-1]}
+		sum += current[len(current)-1]
 
 		for {
-			next := make([]int, len(current)-1)
-			for i := 0; i < len(current)-1; i++ {
-				next[i] = current[i+1] - current[i]
+			// Going from right to left. Overwriting the last item.
+			for i := len(current) - 1; i > 0; i-- {
+				current[i] = current[i] - current[i-1]
 			}
 
-			current = next
-			lasts = append(lasts, current[len(current)-1])
+			// Trim most-left item to items to the right as new iteration.
+			current = current[1:]
+
+			sum += current[len(current)-1]
 
 			if Every(current, 0) {
 				break
 			}
 		}
-
-		sum += Sum(lasts)
 	}
 
 	return sum
@@ -101,12 +93,14 @@ func part2() int {
 		firsts := []int{current[0]}
 
 		for {
-			next := make([]int, len(current)-1)
-			for i := 0; i < len(current)-1; i++ {
-				next[i] = current[i+1] - current[i]
+			// Going from right to left. Overwriting the last item.
+			for i := len(current) - 1; i > 0; i-- {
+				current[i] = current[i] - current[i-1]
 			}
 
-			current = next
+			// Trim most-left item to items to the right as new iteration.
+			current = current[1:]
+
 			firsts = append(firsts, current[0])
 
 			if Every(current, 0) {
