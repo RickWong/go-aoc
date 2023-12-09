@@ -143,3 +143,10 @@ func TestPart2(t *testing.T) {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
 }
+
+func BenchmarkAll(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part1()
+		part2()
+	}
+}
