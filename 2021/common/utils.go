@@ -83,21 +83,21 @@ func IterativeSearch[T any](
 				priority += heuristicFn(branch)
 			}
 
-			if beamWidth == 0 {
+			if beamWidth > 0 {
+				beam.Push(&heapItem[T]{priority, weight, branch})
+			} else {
 				heap.Push(&heapItem[T]{priority, weight, branch})
-				continue
 			}
-
-			if beam.Size() >= beamWidth {
-				beam.Pop()
-			}
-
-			beam.Push(&heapItem[T]{priority, weight, branch})
 		}
 
-		for beam.Size() > 0 {
+		for i := 0; i < beamWidth && beam.Size() > 0; i++ {
 			item, _ := beam.Pop()
 			heap.Push(item)
+		}
+
+		// Clear the rest of the beam.
+		for beam.Size() > 0 {
+			beam.Pop()
 		}
 	}
 
