@@ -35,6 +35,8 @@ func readData(lines []string) []int {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 5934
 	if data == input {
@@ -83,6 +85,8 @@ func solve(days int) int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 26984457539
 	if data == input {

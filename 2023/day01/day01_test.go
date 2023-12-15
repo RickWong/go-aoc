@@ -48,6 +48,8 @@ func part1() int {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 208
 	if data == Input {
@@ -96,6 +98,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 281
 	if data == Input {

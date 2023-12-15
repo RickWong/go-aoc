@@ -82,6 +82,8 @@ func visitAndCountHorizontal(x1 int, x2 int, y1 int, grid []int, gridWidth int) 
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 5
 	if data == input {
@@ -128,6 +130,8 @@ func visitAndCountDiagonal(x1 int, y1 int, x2 int, y2 int, grid []int, gridWidth
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 12
 	if data == input {

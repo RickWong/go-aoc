@@ -150,6 +150,8 @@ func calculateDistances(start *Point, size int) int {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 
 	if data == Example {
@@ -222,6 +224,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 
 	if data == Example {

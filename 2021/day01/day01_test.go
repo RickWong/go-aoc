@@ -35,6 +35,8 @@ func part1() int {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	// How many measurements are larger than the previous measurement?
 	result := part1()
 	expect := 7
@@ -69,6 +71,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	// How many sums are larger than the previous sum?
 	result := part2()
 	expect := 5
