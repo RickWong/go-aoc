@@ -49,6 +49,7 @@ func part1() int {
 				math.Abs(float64(end.x-p.x))
 		},
 		0,
+		true,
 	)
 
 	return lo.Sum(lo.Map(result.Path[1:], func(p *Position, _ int) int {
@@ -129,6 +130,7 @@ func part2() int {
 				math.Abs(float64(end.x-p.x))
 		},
 		0,
+		true,
 	)
 
 	return lo.Sum(lo.Map(result.Path[1:], func(p *Position, _ int) int {

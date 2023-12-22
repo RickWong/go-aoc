@@ -8,6 +8,7 @@ import (
 
 type SearchResult[T any] struct {
 	Best         *T
+	BestWeight   float64
 	Path         []*T
 	Milliseconds int64
 	Iterations   int
@@ -21,20 +22,22 @@ type heapItem[T any] struct {
 
 func IterativeSearch[T any](
 	start *T,
-	// branches are possible iterations based on the current.
+// branches are possible iterations based on the current.
 	branchFn func(current *T) []*T,
-	// predicate terminates the search when true.
+// predicate terminates the search when true.
 	predicateFn func(current *T) bool,
-	// identity is a map key that represents the unique iteration.
+// identity is a map key that represents the unique iteration.
 	identityFn func(current *T) any,
-	// weightFn is a additive/cumulative weight.
+// weightFn is a additive/cumulative weight.
 	weightFn func(current *T) float64,
-	// heuristicFn is an absolute weight modifier.
+// heuristicFn is an absolute weight modifier.
 	heuristicFn func(current *T) float64,
-	// beam width limits search space on each iteration.
+// beam width limits search space on each iteration.
 	beamWidth int,
+// returnFirst terminates the search after the first result.
+	returnFirst bool,
 ) *SearchResult[T] {
-	result := &SearchResult[T]{nil, nil, 0, 0}
+	result := &SearchResult[T]{nil, 0, nil, 0, 0}
 	now := time.Now().UnixMilli()
 
 	lessFn := func(a *heapItem[T], b *heapItem[T]) bool {
@@ -45,7 +48,7 @@ func IterativeSearch[T any](
 	beam := heap2.New(lessFn)
 
 	var trail = make(map[any]*T, 32)
-	var weights = make(map[any]float64, 32)
+	var weights = make(map[any]float64, 256)
 
 	heap.Push(&heapItem[T]{0, 0, start})
 	for heap.Size() > 0 {
@@ -53,8 +56,16 @@ func IterativeSearch[T any](
 		current, _ := heap.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
-			result.Best = current.branch
-			break
+			if result.BestWeight == 0 || result.BestWeight > current.weight {
+				result.Best = current.branch
+				result.BestWeight = current.weight
+			}
+
+			if result.Best != nil && returnFirst {
+				break
+			}
+
+			continue
 		}
 
 		for _, branch := range branchFn(current.branch) {
@@ -101,7 +112,7 @@ func IterativeSearch[T any](
 		}
 	}
 
-	if result.Best != nil {
+	if result.Best != nil && identityFn != nil {
 		result.Path = append(result.Path, result.Best)
 		nextStep := result.Best
 		for nextStep != nil {

@@ -63,6 +63,7 @@ func part1() int {
 		nil,
 		nil,
 		0,
+		true,
 	)
 
 	return ends
@@ -154,6 +155,7 @@ func part2() int {
 		nil,
 		nil,
 		0,
+		true,
 	)
 
 	return ends
