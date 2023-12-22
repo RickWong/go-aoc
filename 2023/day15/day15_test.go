@@ -3,6 +3,7 @@ package day15
 import (
 	_ "embed"
 	"github.com/stretchr/testify/assert"
+	"strings"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ var Example string
 //go:embed input.txt
 var Input string
 
-var data = Example
+var data = Input
 
 // Data types.
 
@@ -21,7 +22,20 @@ var data = Example
 // Part 1.
 
 func part1() int {
-	return 0
+	steps := strings.Split(strings.TrimSpace(data), ",")
+	sum := 0
+
+	for _, step := range steps {
+		v := 0
+		for _, c := range step {
+			v += int(c)
+			v *= 17
+			v %= 256
+		}
+		sum += v
+	}
+
+	return sum
 }
 
 func TestPart1(t *testing.T) {
@@ -32,7 +46,7 @@ func TestPart1(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 1320, result, "Result was incorrect")
 	} else {
-		assert.Equal(t, 105623, result, "Result was incorrect")
+		assert.Equal(t, 506869, result, "Result was incorrect")
 	}
 }
 
