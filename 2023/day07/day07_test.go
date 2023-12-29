@@ -14,7 +14,7 @@ var Example string
 //go:embed input.txt
 var Input string
 
-var data = Example
+var data = Input
 
 func atoi(s string) int {
 	v, _ := strconv.Atoi(s)
@@ -71,7 +71,7 @@ func TestPart1(t *testing.T) {
 	result := part1()
 	expect := 6440
 	if data == Input {
-		expect = 246424613
+		expect = 250453939
 	}
 
 	if result != expect {
@@ -140,7 +140,7 @@ func TestPart2(t *testing.T) {
 	result := part2()
 	expect := 5905
 	if data == Input {
-		expect = 248256639
+		expect = 248652697
 	}
 
 	if result != expect {
