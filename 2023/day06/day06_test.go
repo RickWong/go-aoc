@@ -63,7 +63,7 @@ func TestPart1(t *testing.T) {
 	result := part1()
 	expect := 288
 	if data == Input {
-		expect = 227850
+		expect = 4811940
 	}
 
 	if result != expect {
@@ -93,7 +93,7 @@ func TestPart2(t *testing.T) {
 	result := part2()
 	expect := 71503
 	if data == Input {
-		expect = 42948149
+		expect = 30077773
 	}
 
 	if result != expect {

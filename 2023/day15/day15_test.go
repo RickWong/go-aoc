@@ -46,7 +46,7 @@ func TestPart1(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 1320, result, "Result was incorrect")
 	} else {
-		assert.Equal(t, 506869, result, "Result was incorrect")
+		assert.Equal(t, 511257, result, "Result was incorrect")
 	}
 }
 

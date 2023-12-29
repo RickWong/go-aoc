@@ -110,7 +110,7 @@ func TestPart1(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 19114, result)
 	} else {
-		assert.Equal(t, 332145, result)
+		assert.Equal(t, 374873, result)
 	}
 }
 

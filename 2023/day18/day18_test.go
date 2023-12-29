@@ -138,7 +138,7 @@ func TestPart1(t *testing.T) {
 		assert.Equal(t, 62, result, "Result was incorrect")
 	} else {
 		// 28290 is too low.
-		assert.Equal(t, 70253, result, "Result was incorrect")
+		assert.Equal(t, 47527, result, "Result was incorrect")
 	}
 }
 
