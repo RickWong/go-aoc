@@ -4,11 +4,12 @@ import (
 	_ "embed"
 	. "github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
-	"maps"
+	"golang.org/x/sync/errgroup"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+	"sync/atomic"
 	"testing"
 )
 
@@ -37,13 +38,13 @@ type Brick struct {
 // Helper functions.
 
 func Cubes(b *Brick) []Voxel {
-	res := make([]Voxel, 0)
-
 	if b.start.x > b.end.x ||
 		b.start.y > b.end.y ||
 		b.start.z > b.end.z {
 		panic("inverse brick")
 	}
+
+	res := make([]Voxel, 0, (b.end.x-b.start.x+1)*(b.end.y-b.start.y+1)*(b.end.z-b.start.z+1))
 
 	for x := b.start.x; x <= b.end.x; x++ {
 		for y := b.start.y; y <= b.end.y; y++ {
@@ -101,9 +102,9 @@ func makeHeightmap(bricks []Brick) map[int]map[int]Voxel {
 	}
 
 	// Create the 2D grid.
-	heightmap := make(map[int]map[int]Voxel)
+	heightmap := make(map[int]map[int]Voxel, maxX+1)
 	for x := 0; x <= maxX; x++ {
-		heightmap[x] = make(map[int]Voxel)
+		heightmap[x] = make(map[int]Voxel, maxX+1) // Assume square.
 	}
 
 	return heightmap
@@ -134,21 +135,36 @@ func part1() int {
 
 	// Calculate the heights of the bricks after dropping.
 	brickHeights := calculateDroppedHeights(bricks, -1)
-	sum := 0
+	sum := int64(0)
+	eg := errgroup.Group{}
 
 	// Count the bricks that can be skipped, with the same remaining brick heights.
 	for i := 0; i < len(bricks); i++ {
-		expectedHeights := maps.Clone(brickHeights)
-		delete(expectedHeights, bricks[i].name) // remove skipped
+		i := i
+		
+		eg.Go(func() error {
+			newHeights := calculateDroppedHeights(bricks, i) // recalculate
 
-		actualHeights := calculateDroppedHeights(bricks, i) // recalculate
+			stillTheSame := true
+			for k := range brickHeights {
+				if k == bricks[i].name {
+					continue
+				}
+				if brickHeights[k] != newHeights[k] {
+					stillTheSame = false
+					break
+				}
+			}
+			if stillTheSame {
+				atomic.AddInt64(&sum, 1)
+			}
 
-		if maps.Equal(expectedHeights, actualHeights) {
-			sum++
-		}
+			return nil
+		})
 	}
 
-	return sum
+	_ = eg.Wait()
+	return int(sum)
 }
 
 func TestPart1(t *testing.T) {

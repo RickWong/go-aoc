@@ -22,19 +22,19 @@ type heapItem[T any] struct {
 
 func IterativeSearch[T any](
 	start *T,
-// branches are possible iterations based on the current.
+	// branches are possible iterations based on the current.
 	branchFn func(current *T) []*T,
-// predicate terminates the search when true.
+	// predicate terminates the search when true.
 	predicateFn func(current *T) bool,
-// identity is a map key that represents the unique iteration.
+	// identity is a map key that represents the unique iteration.
 	identityFn func(current *T) any,
-// weightFn is a additive/cumulative weight.
+	// weightFn is a additive/cumulative weight.
 	weightFn func(current *T) float64,
-// heuristicFn is an absolute weight modifier.
+	// heuristicFn is an absolute weight modifier.
 	heuristicFn func(current *T) float64,
-// beam width limits search space on each iteration.
+	// beam width limits search space on each iteration.
 	beamWidth int,
-// returnFirst terminates the search after the first result.
+	// returnFirst terminates the search after the first result.
 	returnFirst bool,
 ) *SearchResult[T] {
 	result := &SearchResult[T]{nil, 0, nil, 0, 0}
@@ -56,7 +56,7 @@ func IterativeSearch[T any](
 		current, _ := heap.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
-			if result.BestWeight == 0 || result.BestWeight > current.weight {
+			if result.BestWeight == 0 || current.weight < result.BestWeight {
 				result.Best = current.branch
 				result.BestWeight = current.weight
 			}
