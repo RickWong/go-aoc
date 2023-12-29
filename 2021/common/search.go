@@ -36,6 +36,8 @@ func IterativeSearch[T any](
 	beamWidth int,
 	// returnFirst terminates the search after the first result.
 	returnFirst bool,
+	// maximize true will search for the highest weight.
+	maximize bool,
 ) *SearchResult[T] {
 	result := &SearchResult[T]{nil, 0, nil, 0, 0}
 	now := time.Now().UnixMilli()
@@ -56,7 +58,9 @@ func IterativeSearch[T any](
 		current, _ := heap.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
-			if result.BestWeight == 0 || current.weight < result.BestWeight {
+			if result.BestWeight == 0 ||
+				(maximize && current.weight > result.BestWeight) ||
+				(!maximize && current.weight < result.BestWeight) {
 				result.Best = current.branch
 				result.BestWeight = current.weight
 			}
@@ -81,7 +85,9 @@ func IterativeSearch[T any](
 
 			if id != nil {
 				knownWeight, known := weights[id]
-				if known && weight >= knownWeight {
+				if known &&
+					((maximize && knownWeight >= weight) ||
+						(!maximize && knownWeight <= weight)) {
 					continue
 				}
 
@@ -92,6 +98,10 @@ func IterativeSearch[T any](
 			priority := weight
 			if heuristicFn != nil {
 				priority += heuristicFn(branch)
+			}
+
+			if maximize {
+				priority = -priority
 			}
 
 			if beamWidth > 0 {

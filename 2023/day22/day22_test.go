@@ -141,7 +141,7 @@ func part1() int {
 	// Count the bricks that can be skipped, with the same remaining brick heights.
 	for i := 0; i < len(bricks); i++ {
 		i := i
-		
+
 		eg.Go(func() error {
 			newHeights := calculateDroppedHeights(bricks, i) // recalculate
 
