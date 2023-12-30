@@ -102,6 +102,7 @@ func part1() int {
 				nil,
 				0,
 				true,
+				false,
 			)
 
 			return nil
@@ -122,9 +123,9 @@ func TestPart1(t *testing.T) {
 	result := part1()
 
 	if data == Example {
-		assert.Equal(t, 21, result, "Result was incorrect")
+		assert.Equal(t, 21, result)
 	} else {
-		assert.Equal(t, 7286, result, "Result was incorrect")
+		assert.Equal(t, 7286, result)
 	}
 }
 
@@ -140,9 +141,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 82000210, result, "Result was incorrect")
+		assert.Equal(t, 82000210, result)
 	} else {
-		assert.Equal(t, 357134560737, result, "Result was incorrect")
+		assert.Equal(t, 357134560737, result)
 	}
 }
 
