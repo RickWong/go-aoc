@@ -3,8 +3,10 @@ package day16
 import (
 	_ "embed"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sync/errgroup"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -41,15 +43,9 @@ func makeLut(maxY int) map[int]map[int]int {
 	return lut
 }
 
-// Part 1.
-
-func part1() int {
-	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
-	sum := 0
-
+func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
 	beams := make([]Beam, 0, 10)
-	beams = append(beams, Beam{0, -1, 0, 1})
+	beams = append(beams, beam)
 	history := make([]Beam, 0, 100)
 	lut := makeLut(len(grid))
 
@@ -102,18 +98,27 @@ func part1() int {
 			}
 		}
 	}
+	return lut
+}
 
-	for y := range grid {
-		for x := range grid[y] {
-			if lut[y][x] > 0 {
-				sum++
-				print("#")
-			} else {
-				print(".")
-			}
-		}
-		print("\n")
+func printAndSum(lut map[int]map[int]int) int {
+	sum := 0
+
+	for y := range lut {
+		sum += len(lut[y])
 	}
+
+	return sum
+}
+
+// Part 1.
+
+func part1() int {
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+
+	lut := traceBeam(grid, Beam{0, -1, 0, 1})
+	sum := printAndSum(lut)
 
 	return sum
 }
@@ -124,16 +129,47 @@ func TestPart1(t *testing.T) {
 	result := part1()
 
 	if data == Example {
-		assert.Equal(t, 46, result, "Result was incorrect")
+		assert.Equal(t, 46, result)
 	} else {
-		assert.Equal(t, 7034, result, "Result was incorrect")
+		assert.Equal(t, 7034, result)
 	}
 }
 
 // Part 2.
 
 func part2() int {
-	return 0
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+	sum := 0
+
+	beams := make([]Beam, 0, 2*len(grid)+2*(len(grid[0])))
+	for y := range grid {
+		beams = append(beams, Beam{y, -1, 0, 1})
+		beams = append(beams, Beam{y, len(grid[0]), 0, -1})
+	}
+	for x := range grid[0] {
+		beams = append(beams, Beam{-1, x, 1, 0})
+		beams = append(beams, Beam{len(grid), x, -1, 0})
+	}
+
+	eg := errgroup.Group{}
+	mu := sync.Mutex{}
+
+	for _, beam := range beams {
+		beam := beam
+
+		eg.Go(func() error {
+			lut := traceBeam(grid, beam)
+			mu.Lock()
+			defer mu.Unlock()
+			sum = max(sum, printAndSum(lut))
+			return nil
+		})
+	}
+
+	_ = eg.Wait()
+
+	return sum
 }
 
 func TestPart2(t *testing.T) {
@@ -142,9 +178,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 82000210, result, "Result was incorrect")
+		assert.Equal(t, 51, result)
 	} else {
-		assert.Equal(t, 357134560737, result, "Result was incorrect")
+		assert.Equal(t, 7759, result)
 	}
 }
 
