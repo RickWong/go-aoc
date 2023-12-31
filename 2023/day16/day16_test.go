@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
-	"slices"
 	"strings"
 	"sync"
 	"testing"
@@ -35,28 +34,28 @@ func Map[T, R any](collection []T, fn func(a T) R) []R {
 	return m
 }
 
-func makeLut(maxY int) map[int]map[int]int {
+func makeLut(height int) map[int]map[int]int {
 	lut := make(map[int]map[int]int)
-	for y := 0; y < maxY; y++ {
+	for y := 0; y < height; y++ {
 		lut[y] = make(map[int]int)
 	}
 	return lut
 }
 
 func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
-	beams := make([]Beam, 0, 10)
-	beams = append(beams, beam)
-	history := make([]Beam, 0, 100)
+	beams := make([]Beam, 0, 128)
+	history := make(map[Beam]bool, 1024)
 	lut := makeLut(len(grid))
 
+	beams = append(beams, beam)
 	for len(beams) > 0 {
 		beam := beams[0]
 		beams = beams[1:]
 
-		if slices.Contains(history, beam) {
+		if _, ok := history[beam]; ok {
 			continue
 		}
-		history = append(history, beam)
+		history[beam] = true
 
 		steps := 0
 		for {
