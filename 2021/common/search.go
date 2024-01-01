@@ -22,16 +22,16 @@ type heapItem[T any] struct {
 
 func IterativeSearch[T any](
 	start *T,
-	// branches are possible iterations based on the current.
-	branchFn func(current *T) []*T,
+	// branches are possible iterations based on the current branch.
+	branchFn func(branch *T) []*T,
 	// predicate terminates the search when true.
-	predicateFn func(current *T) bool,
+	predicateFn func(branch *T) bool,
 	// identity is a map key that represents the unique iteration.
-	identityFn func(current *T) any,
-	// weightFn is a additive/cumulative weight.
-	weightFn func(current *T) float64,
-	// heuristicFn is an absolute weight modifier.
-	heuristicFn func(current *T) float64,
+	identityFn func(branch *T) any,
+	// weight is the absolute weight of the branch.
+	weightFn func(branch *T, currentWeight float64) float64,
+	// heuristic is a relative priority modifier.
+	heuristicFn func(branch *T) float64,
 	// beam width limits search space on each iteration.
 	beamWidth int,
 	// returnFirst terminates the search after the first result.
@@ -42,10 +42,7 @@ func IterativeSearch[T any](
 	result := &SearchResult[T]{nil, 0, nil, 0, 0}
 	now := time.Now().UnixMilli()
 
-	lessFn := func(a *heapItem[T], b *heapItem[T]) bool {
-		return a.
-			priority < b.priority
-	}
+	lessFn := func(a *heapItem[T], b *heapItem[T]) bool { return a.priority < b.priority }
 	heap := heap2.New(lessFn)
 	beam := heap2.New(lessFn)
 
@@ -58,15 +55,15 @@ func IterativeSearch[T any](
 		current, _ := heap.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
-			if result.BestWeight == 0 ||
+			if result.Best == nil ||
 				(maximize && current.weight > result.BestWeight) ||
 				(!maximize && current.weight < result.BestWeight) {
-				result.Best = current.branch
 				result.BestWeight = current.weight
-			}
+				result.Best = current.branch
 
-			if result.Best != nil && returnFirst {
-				break
+				if returnFirst {
+					break
+				}
 			}
 
 			continue
@@ -75,7 +72,7 @@ func IterativeSearch[T any](
 		for _, branch := range branchFn(current.branch) {
 			weight := current.weight
 			if weightFn != nil {
-				weight += weightFn(branch)
+				weight = weightFn(branch, current.weight)
 			}
 
 			var id any

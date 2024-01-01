@@ -25,8 +25,9 @@ type Block struct {
 }
 
 type Trail struct {
-	y, x       int
-	N, E, S, W int // Number of steps in CURRENT direction. RESETS at corners.
+	y, x      int
+	cumLoss   int
+	direction int
 }
 
 // Helper functions.
@@ -46,56 +47,69 @@ func part1() int {
 	result := common.IterativeSearch(
 		&start,
 		func(cur *Trail) []*Trail {
-			branches := make([]*Trail, 0, 4)
+			minSteps := 1
+			maxSteps := 3
+			branches := make([]*Trail, 0, maxSteps*2)
+			cumLoss := 0
 
-			northAllowed := cur.y > start.y && cur.N < 3 && cur.S == 0
-			southAllowed := cur.y < end.y && cur.S < 3 && cur.N == 0
-			westAllowed := cur.x > start.x && cur.W < 3 && cur.E == 0
-			eastAllowed := cur.x < end.x && cur.E < 3 && cur.W == 0
+			if cur.direction == 0 || cur.direction%2 == 0 {
+				cumLoss = cur.cumLoss
+				for i := minSteps; i <= maxSteps; i++ {
+					if cur.x-i >= 0 {
+						cumLoss += grid[cur.y][cur.x-i].loss
+						branches = append(branches,
+							&Trail{cur.y, cur.x - i, cumLoss, 1})
+					}
+				}
+				cumLoss = cur.cumLoss
+				for i := minSteps; i <= maxSteps; i++ {
+					if cur.x+i < len(grid[cur.y]) {
+						cumLoss += grid[cur.y][cur.x+i].loss
+						branches = append(branches,
+							&Trail{cur.y, cur.x + i, cumLoss, 3})
+					}
+				}
+			}
 
-			if northAllowed {
-				branches = append(branches,
-					&Trail{cur.y - 1, cur.x, cur.N + 1, 0, 0, 0})
+			if cur.direction == 0 || cur.direction%2 == 1 {
+				cumLoss = cur.cumLoss
+				for i := minSteps; i <= maxSteps; i++ {
+					if cur.y-i >= 0 {
+						cumLoss += grid[cur.y-i][cur.x].loss
+						branches = append(branches,
+							&Trail{cur.y - i, cur.x, cumLoss, 2})
+					}
+				}
+				cumLoss = cur.cumLoss
+				for i := minSteps; i <= maxSteps; i++ {
+					if cur.y+i < len(grid) {
+						cumLoss += grid[cur.y+i][cur.x].loss
+						branches = append(branches,
+							&Trail{cur.y + i, cur.x, cumLoss, 4})
+					}
+				}
 			}
-			if southAllowed {
-				branches = append(branches,
-					&Trail{cur.y + 1, cur.x, 0, 0, cur.S + 1, 0})
-			}
-			if westAllowed {
-				branches = append(branches,
-					&Trail{cur.y, cur.x - 1, 0, 0, 0, cur.W + 1})
-			}
-			if eastAllowed {
-				branches = append(branches,
-					&Trail{cur.y, cur.x + 1, 0, cur.E + 1, 0, 0})
-			}
+
 			return branches
 		},
 		func(cur *Trail) bool {
 			return cur.y == end.y && cur.x == end.x
 		},
 		func(cur *Trail) any {
-			// Encode trail state as a single 64 bit integer.
-			ret := int64(cur.y)
-			ret |= int64(cur.x) << 10
-			ret |= int64(cur.N) << 20
-			ret |= int64(cur.S) << 25
-			ret |= int64(cur.W) << 30
-			ret |= int64(cur.E) << 35
-			return ret
+			return cur.y | cur.x<<10 | cur.direction<<20
 		},
-		func(cur *Trail) float64 {
-			return float64(grid[cur.y][cur.x].loss)
+		func(cur *Trail, _ float64) float64 {
+			return float64(cur.cumLoss)
 		},
 		func(cur *Trail) float64 {
 			return float64(end.y - cur.y + end.x - cur.x)
 		},
-		3,
-		false,
+		0,
+		true,
 		false,
 	)
 
-	return int(result.BestWeight)
+	return result.Best.cumLoss
 }
 
 func TestPart1(t *testing.T) {
@@ -125,60 +139,77 @@ func part2() int {
 	result := common.IterativeSearch(
 		&start,
 		func(cur *Trail) []*Trail {
-			branches := make([]*Trail, 0, 4)
+			minSteps := 4
+			maxSteps := 10
+			branches := make([]*Trail, 0, maxSteps*2)
+			cumLoss := 0
 
-			northAllowed := cur.y > start.y && cur.N < 10 && cur.S == 0 &&
-				((cur.S|cur.W|cur.E) == 0 || (cur.S|cur.W|cur.E) >= 4)
-			southAllowed := cur.y < end.y && cur.S < 10 && cur.N == 0 &&
-				((cur.N|cur.W|cur.E) == 0 || (cur.N|cur.W|cur.E) >= 4)
-			westAllowed := cur.x > start.x && cur.W < 10 && cur.E == 0 &&
-				((cur.N|cur.S|cur.E) == 0 || (cur.N|cur.S|cur.E) >= 4)
-			eastAllowed := cur.x < end.x && cur.E < 10 && cur.W == 0 &&
-				((cur.N|cur.S|cur.W) == 0 || (cur.N|cur.S|cur.W) >= 4)
+			if cur.direction == 0 || cur.direction%2 == 0 {
+				cumLoss = cur.cumLoss
+				for i := 1; i <= maxSteps; i++ {
+					if cur.x-i >= 0 {
+						cumLoss += grid[cur.y][cur.x-i].loss
+						if i >= minSteps {
+							branches = append(branches,
+								&Trail{cur.y, cur.x - i, cumLoss, 1})
+						}
+					}
+				}
+				cumLoss = cur.cumLoss
+				for i := 1; i <= maxSteps; i++ {
+					if cur.x+i < len(grid[cur.y]) {
+						cumLoss += grid[cur.y][cur.x+i].loss
+						if i >= minSteps {
+							branches = append(branches,
+								&Trail{cur.y, cur.x + i, cumLoss, 3})
+						}
+					}
+				}
+			}
 
-			if northAllowed {
-				branches = append(branches,
-					&Trail{cur.y - 1, cur.x, cur.N + 1, 0, 0, 0})
+			if cur.direction == 0 || cur.direction%2 == 1 {
+				cumLoss = cur.cumLoss
+				for i := 1; i <= maxSteps; i++ {
+					if cur.y-i >= 0 {
+						cumLoss += grid[cur.y-i][cur.x].loss
+						if i >= minSteps {
+							branches = append(branches,
+								&Trail{cur.y - i, cur.x, cumLoss, 2})
+						}
+					}
+				}
+				cumLoss = cur.cumLoss
+				for i := 1; i <= maxSteps; i++ {
+					if cur.y+i < len(grid) {
+						cumLoss += grid[cur.y+i][cur.x].loss
+						if i >= minSteps {
+							branches = append(branches,
+								&Trail{cur.y + i, cur.x, cumLoss, 4})
+						}
+					}
+				}
 			}
-			if southAllowed {
-				branches = append(branches,
-					&Trail{cur.y + 1, cur.x, 0, 0, cur.S + 1, 0})
-			}
-			if westAllowed {
-				branches = append(branches,
-					&Trail{cur.y, cur.x - 1, 0, 0, 0, cur.W + 1})
-			}
-			if eastAllowed {
-				branches = append(branches,
-					&Trail{cur.y, cur.x + 1, 0, cur.E + 1, 0, 0})
-			}
+
 			return branches
 		},
 		func(cur *Trail) bool {
-			return cur.y == end.y && cur.x == end.x && (cur.N|cur.S|cur.W|cur.E) >= 4
+			return cur.y == end.y && cur.x == end.x
 		},
 		func(cur *Trail) any {
-			// Encode trail state as a single 64 bit integer.
-			ret := int64(cur.y)
-			ret |= int64(cur.x) << 10
-			ret |= int64(cur.N) << 20
-			ret |= int64(cur.S) << 25
-			ret |= int64(cur.W) << 30
-			ret |= int64(cur.E) << 35
-			return ret
+			return cur.y | cur.x<<10 | cur.direction<<20
 		},
-		func(cur *Trail) float64 {
-			return float64(grid[cur.y][cur.x].loss)
+		func(cur *Trail, _ float64) float64 {
+			return float64(cur.cumLoss)
 		},
 		func(cur *Trail) float64 {
 			return float64(end.y - cur.y + end.x - cur.x)
 		},
-		3,
-		false,
+		0,
+		true,
 		false,
 	)
 
-	return int(result.BestWeight)
+	return result.Best.cumLoss
 }
 
 func TestPart2(t *testing.T) {
