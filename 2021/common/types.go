@@ -12,6 +12,13 @@ func Atof(s string) float64 {
 	return v
 }
 
+func NonZero(i int) int {
+	if i != 0 {
+		return 1
+	}
+	return 0
+}
+
 func Ptr[T any](v T) *T {
 	return &v
 }

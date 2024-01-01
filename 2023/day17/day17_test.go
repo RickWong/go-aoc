@@ -48,19 +48,24 @@ func part1() int {
 		func(cur *Trail) []*Trail {
 			branches := make([]*Trail, 0, 4)
 
-			if cur.y > start.y && cur.N < 3 && cur.S == 0 {
+			northAllowed := cur.y > start.y && cur.N < 3 && cur.S == 0
+			southAllowed := cur.y < end.y && cur.S < 3 && cur.N == 0
+			westAllowed := cur.x > start.x && cur.W < 3 && cur.E == 0
+			eastAllowed := cur.x < end.x && cur.E < 3 && cur.W == 0
+
+			if northAllowed {
 				branches = append(branches,
 					&Trail{cur.y - 1, cur.x, cur.N + 1, 0, 0, 0})
 			}
-			if cur.y < end.y && cur.S < 3 && cur.N == 0 {
+			if southAllowed {
 				branches = append(branches,
 					&Trail{cur.y + 1, cur.x, 0, 0, cur.S + 1, 0})
 			}
-			if cur.x > start.x && cur.W < 3 && cur.E == 0 {
+			if westAllowed {
 				branches = append(branches,
 					&Trail{cur.y, cur.x - 1, 0, 0, 0, cur.W + 1})
 			}
-			if cur.x < end.x && cur.E < 3 && cur.W == 0 {
+			if eastAllowed {
 				branches = append(branches,
 					&Trail{cur.y, cur.x + 1, 0, cur.E + 1, 0, 0})
 			}
@@ -70,8 +75,14 @@ func part1() int {
 			return cur.y == end.y && cur.x == end.x
 		},
 		func(cur *Trail) any {
-			// Encode trail state as a single 32 bit integer.
-			return cur.y<<0 | cur.x<<10 | cur.N<<20 | cur.E<<23 | cur.S<<26 | cur.W<<29
+			// Encode trail state as a single 64 bit integer.
+			ret := int64(cur.y)
+			ret |= int64(cur.x) << 10
+			ret |= int64(cur.N) << 20
+			ret |= int64(cur.S) << 25
+			ret |= int64(cur.W) << 30
+			ret |= int64(cur.E) << 35
+			return ret
 		},
 		func(cur *Trail) float64 {
 			return float64(grid[cur.y][cur.x].loss)
@@ -93,9 +104,9 @@ func TestPart1(t *testing.T) {
 	result := part1()
 
 	if data == Example {
-		assert.Equal(t, 102, result, "Result was incorrect")
+		assert.Equal(t, 102, result)
 	} else {
-		assert.Equal(t, 1128, result, "Result was incorrect")
+		assert.Equal(t, 1128, result)
 	}
 }
 
@@ -151,9 +162,9 @@ func part2() int {
 			ret := int64(cur.y)
 			ret |= int64(cur.x) << 10
 			ret |= int64(cur.N) << 20
-			ret |= int64(cur.E) << 24
-			ret |= int64(cur.S) << 28
-			ret |= int64(cur.W) << 32
+			ret |= int64(cur.S) << 25
+			ret |= int64(cur.W) << 30
+			ret |= int64(cur.E) << 35
 			return ret
 		},
 		func(cur *Trail) float64 {
@@ -162,7 +173,7 @@ func part2() int {
 		func(cur *Trail) float64 {
 			return float64(end.y - cur.y + end.x - cur.x)
 		},
-		0,
+		3,
 		false,
 		false,
 	)
@@ -176,9 +187,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 94, result, "Result was incorrect")
+		assert.Equal(t, 94, result)
 	} else {
-		assert.Equal(t, 1268, result, "Result was incorrect")
+		assert.Equal(t, 1268, result)
 	}
 }
 
