@@ -2,8 +2,8 @@ package day02
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"regexp"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -15,11 +15,6 @@ var Example string
 var Input string
 
 var data = Input
-
-func atoi(s *string) int {
-	v, _ := strconv.Atoi(*s)
-	return v
-}
 
 func part1() int {
 	lines := strings.Split(data, "\n")
@@ -33,9 +28,9 @@ outer:
 		for _, draw := range draws {
 			count, color := draw[1], draw[2]
 			switch {
-			case color == "red" && atoi(&count) > 12,
-				color == "green" && atoi(&count) > 13,
-				color == "blue" && atoi(&count) > 14:
+			case color == "red" && common.Atoi(count) > 12,
+				color == "green" && common.Atoi(count) > 13,
+				color == "blue" && common.Atoi(count) > 14:
 				continue outer
 			}
 		}
@@ -71,7 +66,7 @@ func part2() int {
 
 		for _, draw := range draws {
 			count, color := draw[1], draw[2]
-			maxes[color] = max(maxes[color], atoi(&count))
+			maxes[color] = max(maxes[color], common.Atoi(count))
 		}
 
 		sum += maxes["red"] * maxes["green"] * maxes["blue"]

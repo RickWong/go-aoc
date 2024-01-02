@@ -2,11 +2,11 @@ package day05
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/samber/lo"
 	"golang.org/x/sync/errgroup"
 	"regexp"
 	"runtime"
-	"strconv"
 	"strings"
 	"sync"
 	"testing"
@@ -20,36 +20,17 @@ var Input string
 
 var data = Input
 
-func atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
-func fields(s string) []string {
-	return strings.Fields(s)
-}
-
-func mapFn[T, R any](collection []T, fn func(a T) R) []R {
-	return lo.Map[T, R](collection, func(v T, _ int) R {
-		return fn(v)
-	})
-}
-
-func trim(s string) string {
-	return strings.TrimSpace(s)
-}
-
 func part1() int {
 	re := regexp.MustCompile(`((?:\d+\s?){3,})`)
 	maps := re.FindAllStringSubmatch(data, -1)
-	seeds := mapFn(fields(trim(maps[0][0])), atoi)
+	seeds := common.Map(strings.Fields(strings.TrimSpace(maps[0][0])), common.Atoi)
 
 	for _, m := range maps[1:] {
-		lines := lo.Chunk(fields(trim(m[0])), 3)
+		lines := lo.Chunk(strings.Fields(strings.TrimSpace(m[0])), 3)
 
 		for i := range seeds {
 			for _, line := range lines {
-				dst, src, num := atoi(line[0]), atoi(line[1]), atoi(line[2])
+				dst, src, num := common.Atoi(line[0]), common.Atoi(line[1]), common.Atoi(line[2])
 				v := seeds[i]
 
 				if v >= src && v < src+num {
@@ -80,11 +61,11 @@ func TestPart1(t *testing.T) {
 func part2() int {
 	re := regexp.MustCompile(`((?:\d+\s?){3,})`)
 	maps := re.FindAllStringSubmatch(data, -1)
-	ranges := lo.Chunk(mapFn(fields(trim(maps[0][0])), atoi), 2)
-	transforms := lo.Reverse(mapFn(maps[1:], func(m []string) [][]int {
-		lines := lo.Chunk(fields(trim(m[0])), 3)
-		return lo.Reverse(mapFn(lines, func(line []string) []int {
-			return []int{atoi(line[0]), atoi(line[1]), atoi(line[2])}
+	ranges := lo.Chunk(common.Map(strings.Fields(strings.TrimSpace(maps[0][0])), common.Atoi), 2)
+	transforms := lo.Reverse(common.Map(maps[1:], func(m []string) [][]int {
+		lines := lo.Chunk(strings.Fields(strings.TrimSpace(m[0])), 3)
+		return lo.Reverse(common.Map(lines, func(line []string) []int {
+			return []int{common.Atoi(line[0]), common.Atoi(line[1]), common.Atoi(line[2])}
 		}))
 	}))
 

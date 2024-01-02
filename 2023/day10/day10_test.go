@@ -2,6 +2,7 @@ package day10
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -26,16 +27,6 @@ type Point struct {
 }
 
 // Helper functions.
-
-// In() is faster than strings.ContainsAny().
-func In(haystack string, chars string) bool {
-	for _, c := range chars {
-		if strings.IndexByte(haystack, byte(c)) >= 0 {
-			return true
-		}
-	}
-	return false
-}
 
 // Part 1.
 
@@ -75,7 +66,7 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 				}
 
 				next := points[y+a.y][x+a.x]
-				if In(a.self, p.tile) && In(a.match, next.tile) {
+				if common.In(a.self, p.tile) && common.In(a.match, next.tile) {
 					p.next = append(p.next, next)
 				}
 			}

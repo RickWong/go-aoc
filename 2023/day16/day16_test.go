@@ -2,6 +2,7 @@ package day16
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 	"strings"
@@ -25,14 +26,6 @@ type Beam struct {
 }
 
 // Helper functions.
-
-func Map[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
-		m[i] = fn(v)
-	}
-	return m
-}
 
 func makeLut(height int) map[int]map[int]int {
 	lut := make(map[int]map[int]int)
@@ -114,7 +107,7 @@ func printAndSum(lut map[int]map[int]int) int {
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
 
 	lut := traceBeam(grid, Beam{0, -1, 0, 1})
 	sum := printAndSum(lut)
@@ -138,7 +131,7 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
 	sum := 0
 
 	beams := make([]Beam, 0, 2*len(grid)+2*(len(grid[0])))

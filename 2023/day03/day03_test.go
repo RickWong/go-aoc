@@ -2,7 +2,7 @@ package day03
 
 import (
 	_ "embed"
-	"strconv"
+	"github.com/RickWong/go-aoc/2021/common"
 	"strings"
 	"testing"
 	"unicode"
@@ -20,11 +20,6 @@ type Number struct {
 	y,
 	x1, x2 int
 	value int
-}
-
-func atoi(s *string) int {
-	v, _ := strconv.Atoi(*s)
-	return v
 }
 
 func irange(start int, end int) []int {
@@ -64,7 +59,7 @@ func part1() int {
 
 			if len(parsed) > 0 &&
 				(!isDigit || isLast) {
-				numbers = append(numbers, Number{y, x1, i - 1, atoi(&parsed)})
+				numbers = append(numbers, Number{y, x1, i - 1, common.Atoi(parsed)})
 				parsed = ""
 			}
 		}
@@ -138,7 +133,7 @@ func part2() int {
 
 			if len(parsed) > 0 &&
 				(!isDigit || isLast) {
-				numbers = append(numbers, Number{y, x1, i - 1, atoi(&parsed)})
+				numbers = append(numbers, Number{y, x1, i - 1, common.Atoi(parsed)})
 				parsed = ""
 			}
 		}

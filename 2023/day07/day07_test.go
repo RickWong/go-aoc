@@ -2,8 +2,8 @@ package day07
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -15,15 +15,6 @@ var Example string
 var Input string
 
 var data = Input
-
-func atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
-func fields(s string) []string {
-	return strings.Fields(s)
-}
 
 type Player struct {
 	hand  string
@@ -37,7 +28,7 @@ func part1() int {
 	marks := "_23456789TJQKA"
 
 	for _, line := range lines {
-		info := fields(line)
+		info := strings.Fields(line)
 		score, hand, bid := 0, info[0], info[1]
 		counts := make(map[string]int, len(hand))
 
@@ -52,7 +43,7 @@ func part1() int {
 			score += (1 << (20 + count*2)) & 0xFFF00000
 		}
 
-		players = append(players, Player{hand, score, atoi(bid)})
+		players = append(players, Player{hand, score, common.Atoi(bid)})
 	}
 
 	slices.SortFunc(players, func(a, b Player) int { return a.score - b.score })
@@ -85,7 +76,7 @@ func part2() int {
 	marks := "_J23456789TQKA"
 
 	for _, line := range lines {
-		info := fields(line)
+		info := strings.Fields(line)
 		score, hand, bid := 0, info[0], info[1]
 		counts := make(map[string]int)
 
@@ -121,7 +112,7 @@ func part2() int {
 			score += (1 << (20 + count*2)) & 0xFFF00000
 		}
 
-		players = append(players, Player{hand, score, atoi(bid)})
+		players = append(players, Player{hand, score, common.Atoi(bid)})
 	}
 
 	slices.SortFunc(players, func(a, b Player) int { return a.score - b.score })

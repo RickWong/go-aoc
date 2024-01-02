@@ -2,9 +2,9 @@ package day09
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"slices"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -18,19 +18,6 @@ var Input string
 var data = Input
 
 // Helper functions.
-
-func Atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
-func Map[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
-		m[i] = fn(v)
-	}
-	return m
-}
 
 func Every(collection []int, is int) bool {
 	for _, v := range collection {
@@ -62,7 +49,7 @@ func part1() int {
 	sum := 0
 
 	for _, line := range lines {
-		numbers := Map(strings.Fields(line), Atoi)
+		numbers := common.Map(strings.Fields(line), common.Atoi)
 
 		current := numbers
 		sum += current[len(current)-1]
@@ -100,7 +87,7 @@ func part2() int {
 	for _, line := range lines {
 		// Extrapolating backward is the same as extrapolating forward the reversed sequence.
 		// By reversing the sequence we can reuse the exact logic in part 1.
-		numbers := Map(strings.Fields(line), Atoi)
+		numbers := common.Map(strings.Fields(line), common.Atoi)
 		slices.Reverse(numbers)
 
 		current := numbers

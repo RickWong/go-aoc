@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
-	"strconv"
 	"strings"
 	"testing"
 )
@@ -30,11 +29,6 @@ type Hole struct {
 
 // Helper functions.
 
-func Atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
 // Part 1.
 
 func part1() int {
@@ -54,7 +48,7 @@ func part1() int {
 
 	for _, line := range lines {
 		parts := strings.Fields(line)
-		direction, meters, color := parts[0][0], Atoi(parts[1]), parts[2][1:len(parts[2])-1]
+		direction, meters, color := parts[0][0], common.Atoi(parts[1]), parts[2][1:len(parts[2])-1]
 
 		for i := 0; i < meters; i++ {
 			y += deltas[direction][0]

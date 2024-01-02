@@ -2,6 +2,7 @@ package day08
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"regexp"
 	"strings"
 	"testing"
@@ -58,30 +59,6 @@ func TestPart1(t *testing.T) {
 	}
 }
 
-func gcd(a, b int) int {
-	for b != 0 {
-		t := b
-		b = a % b
-		a = t
-	}
-	return a
-}
-
-func lcm(integers ...int) int {
-	if len(integers) < 2 {
-		return integers[0]
-	}
-
-	a, b := integers[0], integers[1]
-	result := a * b / gcd(a, b)
-
-	for i := 2; i < len(integers); i++ {
-		result = lcm(result, integers[i])
-	}
-
-	return result
-}
-
 func part2() int {
 	lines := strings.Split(data, "\n")
 	path := strings.Split(lines[0], "")
@@ -116,7 +93,7 @@ func part2() int {
 		}
 	}
 
-	return lcm(steps...)
+	return common.LCM(steps...)
 }
 
 func TestPart2(t *testing.T) {

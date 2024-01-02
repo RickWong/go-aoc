@@ -2,6 +2,7 @@ package day04
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"strconv"
 	"strings"
 	"testing"
@@ -22,13 +23,6 @@ type MarkableNumber struct {
 type Board struct {
 	id   int
 	grid [][]MarkableNumber
-}
-
-func mapto[T any, R any](ss []T, mapper func(T) R) (ret []R) {
-	for _, s := range ss {
-		ret = append(ret, mapper(s))
-	}
-	return
 }
 
 func sumUnmarkedNumbers(board *Board, drawnNumber string) int {
@@ -80,7 +74,7 @@ func parseData(lines []string) ([]string, []Board) {
 		}
 
 		board.grid = append(board.grid,
-			mapto(numbers,
+			common.Map(numbers,
 				func(s string) MarkableNumber {
 					return MarkableNumber{s, false}
 				},

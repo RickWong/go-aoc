@@ -2,6 +2,7 @@ package day14
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"hash/crc32"
 	"strings"
@@ -19,14 +20,6 @@ var data = Input
 // Data types.
 
 // Helper functions.
-
-func Map[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
-		m[i] = fn(v)
-	}
-	return m
-}
 
 func printAndSum(grid [][]string) int {
 	sum := 0
@@ -118,7 +111,7 @@ func tiltNorth(grid [][]string) {
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
 	sum := 0
 
 	for x := 0; x < len(grid[0]); x++ {
@@ -164,7 +157,7 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
 
 	genCycles := 1000
 	checksums := make(map[uint32]int, genCycles)
@@ -178,7 +171,7 @@ func part2() int {
 
 		bytes := []byte(
 			strings.Join(
-				Map(grid, func(row []string) string { return strings.Join(row, "") }),
+				common.Map(grid, func(row []string) string { return strings.Join(row, "") }),
 				"",
 			),
 		)

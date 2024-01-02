@@ -14,3 +14,11 @@ func Reset[T any](c *[]T) {
 	capacity := cap(*c)
 	*c = (*c)[:0:capacity]
 }
+
+func Map[T, R any](collection []T, fn func(a T) R) []R {
+	m := make([]R, len(collection))
+	for i, v := range collection {
+		m[i] = fn(v)
+	}
+	return m
+}

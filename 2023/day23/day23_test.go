@@ -77,8 +77,8 @@ func part1() int {
 		func(t *Trail) any {
 			return t.y<<16 | t.x
 		},
-		func(t *Trail) float64 {
-			return 1
+		func(t *Trail, currentWeight float64) float64 {
+			return currentWeight + 1
 		},
 		nil,
 		0,

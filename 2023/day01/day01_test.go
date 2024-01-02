@@ -2,6 +2,7 @@ package day01
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/2021/common"
 	"strings"
 	"testing"
 )
@@ -13,22 +14,6 @@ var Example string
 var Input string
 
 var data = Input
-
-func mapFn[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
-		m[i] = fn(v)
-	}
-	return m
-}
-
-func sum(collection []int) int {
-	m := 0
-	for _, v := range collection {
-		m += v
-	}
-	return m
-}
 
 func calibrate(s string) int {
 	first := strings.IndexAny(s, "0123456789")
@@ -44,7 +29,7 @@ func calibrate(s string) int {
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	return sum(mapFn(lines, calibrate))
+	return common.Sum(common.Map(lines, calibrate))
 }
 
 func TestPart1(t *testing.T) {
@@ -88,13 +73,11 @@ func translate(s string) string {
 	return s
 }
 
-func transform(s string) int {
-	return calibrate(translate(s))
-}
-
 func part2() int {
 	lines := strings.Split(data, "\n")
-	return sum(mapFn(lines, transform))
+	return common.Sum(common.Map(lines, func(s string) int {
+		return calibrate(translate(s))
+	}))
 }
 
 func TestPart2(t *testing.T) {

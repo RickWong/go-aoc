@@ -5,7 +5,6 @@ import (
 	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
-	"strconv"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -21,20 +20,12 @@ var data = Input
 
 // Data types.
 
+type Variant struct {
+	springs      string
+	nextWildcard int
+}
+
 // Helper functions.
-
-func Atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
-func Map[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
-		m[i] = fn(v)
-	}
-	return m
-}
 
 func validate(springs string, groups []int) bool {
 	curGroup := 0
@@ -71,7 +62,6 @@ func part1() int {
 	lines := strings.Split(data, "\n")
 	sum := int64(0)
 	eg := errgroup.Group{}
-	eg.SetLimit(64)
 
 	for _, line := range lines {
 		line := line
@@ -79,19 +69,25 @@ func part1() int {
 		eg.Go(func() error {
 			row := strings.Split(line, " ")
 			springs, sizes_ := row[0], row[1]
-			sizes := Map(strings.Split(sizes_, ","), Atoi)
+			sizes := common.Map(strings.Split(sizes_, ","), common.Atoi)
 
 			common.IterativeSearch(
-				&springs,
-				func(s *string) []*string {
-					index := strings.Index(*s, "?")
-					if index >= 0 {
-						branches := make([]*string, 0, 2)
-						variant1 := (*s)[:index] + "#" + (*s)[index+1:]
-						variant2 := (*s)[:index] + "." + (*s)[index+1:]
-						branches = append(branches, &variant1, &variant2)
-						return branches
-					} else if validate(*s, sizes) {
+				&Variant{springs, strings.Index(springs, "?")},
+				func(v *Variant) []*Variant {
+					if v.nextWildcard >= 0 {
+						nextWildcard := strings.Index(v.springs[v.nextWildcard+1:], "?")
+						if nextWildcard >= 0 {
+							nextWildcard += v.nextWildcard + 1
+						}
+						bs := []byte(v.springs)
+						bs[v.nextWildcard] = '#'
+						variant1 := Variant{string(bs), nextWildcard}
+						bs[v.nextWildcard] = '.'
+						variant2 := Variant{string(bs), nextWildcard}
+						return []*Variant{&variant1, &variant2}
+					}
+
+					if validate(v.springs, sizes) {
 						atomic.AddInt64(&sum, 1)
 					}
 					return nil
@@ -109,11 +105,7 @@ func part1() int {
 		})
 	}
 
-	err := eg.Wait()
-	if err != nil {
-		panic(err)
-	}
-
+	_ = eg.Wait()
 	return int(sum)
 }
 

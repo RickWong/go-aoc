@@ -39,6 +39,22 @@ type Number interface {
 	constraints.Integer | constraints.Float
 }
 
+func Sum[T Number](collection []T) T {
+	var m T = 0
+	for _, v := range collection {
+		m += v
+	}
+	return m
+}
+
+func Product[T Number](collection []T) T {
+	var m T = 1
+	for _, v := range collection {
+		m *= v
+	}
+	return m
+}
+
 func Manhattan[T Number](a Point2D[T], b Point2D[T]) T {
 	diffY := b.y - a.y
 	diffX := b.x - a.x

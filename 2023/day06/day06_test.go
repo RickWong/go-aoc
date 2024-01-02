@@ -2,8 +2,7 @@ package day06
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
-	"strconv"
+	"github.com/RickWong/go-aoc/2021/common"
 	"strings"
 	"testing"
 )
@@ -16,33 +15,10 @@ var Input string
 
 var data = Input
 
-func atoi(s string) int {
-	v, _ := strconv.Atoi(s)
-	return v
-}
-
-func fields(s string) []string {
-	return strings.Fields(s)
-}
-
-func mapFn[T, R any](collection []T, fn func(a T) R) []R {
-	return lo.Map[T, R](collection, func(v T, _ int) R {
-		return fn(v)
-	})
-}
-
-func product(collection []int) int {
-	m := 1
-	for _, v := range collection {
-		m *= v
-	}
-	return m
-}
-
 func part1() int {
 	lines := strings.Split(data, "\n")
-	times := mapFn(fields(lines[0])[1:], atoi)
-	distances := mapFn(fields(lines[1])[1:], atoi)
+	times := common.Map(strings.Fields(lines[0])[1:], common.Atoi)
+	distances := common.Map(strings.Fields(lines[1])[1:], common.Atoi)
 	numWaysToWin := make([]int, len(times))
 
 	for i, time := range times {
@@ -54,7 +30,7 @@ func part1() int {
 		}
 	}
 
-	return product(numWaysToWin)
+	return common.Product(numWaysToWin)
 }
 
 func TestPart1(t *testing.T) {
@@ -73,8 +49,8 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	time := atoi(strings.Join(fields(lines[0])[1:], ""))
-	distance := atoi(strings.Join(fields(lines[1])[1:], ""))
+	time := common.Atoi(strings.Join(strings.Fields(lines[0])[1:], ""))
+	distance := common.Atoi(strings.Join(strings.Fields(lines[1])[1:], ""))
 	numWaysToWin := 0
 
 	for hold := 0; hold < time; hold++ {
