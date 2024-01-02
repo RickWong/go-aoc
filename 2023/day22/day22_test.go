@@ -58,13 +58,13 @@ func Cubes(b *Brick) []Voxel {
 }
 
 // calculateDroppedHeights returns the heights of the bricks after dropping.
-func calculateDroppedHeights(bricks []Brick, skip int) map[string]int {
+func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[string]int) map[string]int {
 	heights := make(map[string]int, len(bricks))
-	collisionMap := makeHeightmap(bricks)
+	collisionMap, width := makeHeightmap(bricks)
 
 	// Drop the bricks one by one.
 	for i := 0; i < len(bricks); i++ {
-		if skip == i {
+		if i == skip {
 			continue
 		}
 
@@ -72,20 +72,29 @@ func calculateDroppedHeights(bricks []Brick, skip int) map[string]int {
 		distance := 100000000
 
 		for _, cube := range b1.cubes {
-			b2 := collisionMap[cube.x][cube.y]
+			b2 := collisionMap[cube.y*width+cube.x]
 			h := b2.z + 1
 			distance = min(distance, cube.z-h)
 		}
 
+		blockHeight := b1.start.z - distance
+
+		// Check if the dropped height of b1 is the same as the expected height.
+		if len(checkHeights) > 0 {
+			if h, ok := checkHeights[b1.name]; !ok || h != blockHeight {
+				return nil
+			}
+		}
+
 		// Stored dropped height of b1.
-		heights[b1.name] = b1.start.z - distance
+		heights[b1.name] = blockHeight
 
 		for _, cube := range b1.cubes {
-			b2 := collisionMap[cube.x][cube.y]
+			b2 := collisionMap[cube.y*width+cube.x]
 			droppedZ := cube.z - distance
 
 			if b2.name == "" || droppedZ > b2.z {
-				collisionMap[cube.x][cube.y] = Voxel{b1.name, cube.x, cube.y, droppedZ}
+				collisionMap[cube.y*width+cube.x] = Voxel{b1.name, cube.x, cube.y, droppedZ}
 			}
 		}
 	}
@@ -93,21 +102,19 @@ func calculateDroppedHeights(bricks []Brick, skip int) map[string]int {
 	return heights
 }
 
-// makeHeightmap returns a 2D grid of voxels.
-func makeHeightmap(bricks []Brick) map[int]map[int]Voxel {
+// makeHeightmap returns a 1D grid of voxels.
+func makeHeightmap(bricks []Brick) (map[int]Voxel, int) {
 	// Find max of X.
 	maxX := 0
 	for _, brick := range bricks {
 		maxX = max(maxX, brick.end.x)
 	}
+	width := maxX + 1
 
-	// Create the 2D grid.
-	heightmap := make(map[int]map[int]Voxel, maxX+1)
-	for x := 0; x <= maxX; x++ {
-		heightmap[x] = make(map[int]Voxel, maxX+1) // Assume square.
-	}
+	// Create the 1D grid.
+	heightmap := make(map[int]Voxel, width*width) // Assume square.
 
-	return heightmap
+	return heightmap, width
 }
 
 // Part 1.
@@ -134,7 +141,7 @@ func part1() int {
 	})
 
 	// Calculate the heights of the bricks after dropping.
-	brickHeights := calculateDroppedHeights(bricks, -1)
+	brickHeights := calculateDroppedHeights(bricks, -1, nil)
 	sum := int64(0)
 	eg := errgroup.Group{}
 
@@ -143,19 +150,9 @@ func part1() int {
 		i := i
 
 		eg.Go(func() error {
-			newHeights := calculateDroppedHeights(bricks, i) // recalculate
+			newHeights := calculateDroppedHeights(bricks, i, brickHeights) // recalculate
 
-			stillTheSame := true
-			for k := range brickHeights {
-				if k == bricks[i].name {
-					continue
-				}
-				if brickHeights[k] != newHeights[k] {
-					stillTheSame = false
-					break
-				}
-			}
-			if stillTheSame {
+			if newHeights != nil {
 				atomic.AddInt64(&sum, 1)
 			}
 
