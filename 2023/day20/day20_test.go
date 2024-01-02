@@ -3,8 +3,8 @@ package day20
 import (
 	_ "embed"
 	. "github.com/RickWong/go-aoc/2021/common"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/maps"
 	"regexp"
 	"strings"
 	"testing"
@@ -62,27 +62,37 @@ func part1() int {
 		}
 	}
 
-	history := make([]Pulse, 0, 1024)
+	low := 0
+	high := 0
 
+	pulses := make([]Pulse, 0, 768)
 	for i := 0; i < 1000; i++ {
-		pulses := make([]Pulse, 1, 64)
-		pulses[0] = Pulse{"button", "broadcaster", false}
+		pulses = pulses[:0]
+		pulses = append(pulses, Pulse{"button", "broadcaster", false})
 
 		for len(pulses) > 0 {
 			pulse := pulses[0]
 			pulses = pulses[1:]
-			history = append(history, pulse)
+
+			if pulse.power {
+				high++
+			} else {
+				low++
+			}
 
 			module := modules[pulse.output]
+			mem := memory[module.name]
+
 			if module.flipflop {
 				if pulse.power {
 					continue
 				}
-				memory[module.name][pulse.input] = !memory[module.name][pulse.input]
-				pulse.power = memory[module.name][pulse.input]
+				power := !mem[pulse.input]
+				mem[pulse.input] = power
+				pulse.power = power
 			} else if module.conjunction {
-				memory[module.name][pulse.input] = pulse.power
-				pulse.power = !AllValues(memory[module.name], true)
+				mem[pulse.input] = pulse.power
+				pulse.power = !AllValues(mem, true)
 			}
 
 			for _, output := range module.outputs {
@@ -91,8 +101,6 @@ func part1() int {
 		}
 	}
 
-	low := lo.CountBy(history, func(p Pulse) bool { return !p.power })
-	high := lo.CountBy(history, func(p Pulse) bool { return p.power })
 	sum := low * high
 	return sum
 }
@@ -112,6 +120,73 @@ func TestPart1(t *testing.T) {
 // Part 2.
 
 func part2() int {
+	data := data
+	modulesRegex := regexp.MustCompile(`(?m)^([\w%&]+) -> ([\w, ]+)$`)
+	modules := make(map[string]Module, 1024)
+	for _, match := range modulesRegex.FindAllStringSubmatch(data, -1) {
+		input, outputs := match[1], strings.Split(match[2], ", ")
+		flipflop := strings.HasPrefix(input, "%")
+		conjunction := strings.HasPrefix(input, "&")
+		if flipflop || conjunction {
+			input = input[1:]
+		}
+		modules[input] = Module{input, outputs, flipflop, conjunction}
+	}
+
+	// For each output, store false values for each input.
+	memory := make(map[string]map[string]bool)
+	for _, module := range modules {
+		for _, output := range module.outputs {
+			if memory[output] == nil {
+				memory[output] = make(map[string]bool)
+			}
+			memory[output][module.name] = false
+		}
+	}
+
+	// Inspected input to find conjunctions that lead to kl and rx.
+	pressesForLCM := map[string]int{"fp": -1, "mk": -1, "xt": -1, "zc": -1}
+	numModulesForLCM := len(pressesForLCM)
+
+	pulses := make([]Pulse, 0, 1024*256)
+	for i := 0; i < 10000; i++ {
+		pulses = pulses[:0]
+		pulses = append(pulses, Pulse{"button", "broadcaster", false})
+
+		for len(pulses) > 0 {
+			pulse := pulses[0]
+			pulses = pulses[1:]
+
+			module := modules[pulse.output]
+			mem := memory[module.name]
+
+			if module.flipflop {
+				if pulse.power {
+					continue
+				}
+				power := !mem[pulse.input]
+				mem[pulse.input] = power
+				pulse.power = power
+			} else if module.conjunction {
+				mem[pulse.input] = pulse.power
+				pulse.power = !AllValues(mem, true)
+
+				if pulse.power && pressesForLCM[module.name] == -1 {
+					pressesForLCM[module.name] = i + 1
+					numModulesForLCM--
+					if numModulesForLCM == 0 {
+						lcm := LCM(maps.Values(pressesForLCM)...)
+						return lcm
+					}
+				}
+			}
+
+			for _, output := range module.outputs {
+				pulses = append(pulses, Pulse{module.name, output, pulse.power})
+			}
+		}
+	}
+
 	return 0
 }
 
@@ -123,7 +198,7 @@ func TestPart2(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 82000210, result)
 	} else {
-		assert.Equal(t, 357134560737, result)
+		assert.Equal(t, 232774988886497, result)
 	}
 }
 

@@ -112,6 +112,7 @@ func part1() int {
 					nil,
 					0,
 					false,
+					false,
 				)
 			}
 		}

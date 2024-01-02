@@ -16,7 +16,7 @@ require (
 	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/twmb/algoimpl v0.0.0-20170717182524-076353e90b94 // indirect
 	github.com/zyedidia/generic v1.2.1 // indirect
-	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
+	golang.org/x/exp v0.0.0-20231226003508-02704c960a9b // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/sys v0.14.0 // indirect
 	gonum.org/v1/gonum v0.14.0 // indirect
