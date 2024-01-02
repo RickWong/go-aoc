@@ -94,7 +94,8 @@ func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[string]i
 			droppedZ := cube.z - distance
 
 			if b2.name == "" || droppedZ > b2.z {
-				collisionMap[cube.y*width+cube.x] = Voxel{b1.name, cube.x, cube.y, droppedZ}
+				b2.name = b1.name
+				b2.z = droppedZ
 			}
 		}
 	}
@@ -103,7 +104,7 @@ func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[string]i
 }
 
 // makeHeightmap returns a 1D grid of voxels.
-func makeHeightmap(bricks []Brick) (map[int]Voxel, int) {
+func makeHeightmap(bricks []Brick) (map[int]*Voxel, int) {
 	// Find max of X.
 	maxX := 0
 	for _, brick := range bricks {
@@ -112,7 +113,12 @@ func makeHeightmap(bricks []Brick) (map[int]Voxel, int) {
 	width := maxX + 1
 
 	// Create the 1D grid.
-	heightmap := make(map[int]Voxel, width*width) // Assume square.
+	heightmap := make(map[int]*Voxel, width*width) // Assume square.
+	for y := 0; y < width; y++ {
+		for x := 0; x < width; x++ {
+			heightmap[y*width+x] = &Voxel{"", x, y, 0}
+		}
+	}
 
 	return heightmap, width
 }
