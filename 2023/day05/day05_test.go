@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"testing"
 )
 
@@ -69,35 +69,39 @@ func part2() int {
 		}))
 	}))
 
-	eg := new(errgroup.Group)
-	eg.SetLimit(runtime.NumCPU())
-
-	lowest := 1 << 31
-	count := 0
-	mu := sync.Mutex{}
-
-	for i := 0; i < 100000000000 && count < runtime.NumCPU(); i++ {
-		i := i
-
-		eg.Go(func() error {
-			v := i
-			for _, rules := range transforms {
-				for _, rule := range rules {
-					from := rule[0]
-					till := from + rule[2]
-					move := rule[1] - from
-					if v >= from && v < till {
-						v += move
-						break
-					}
+	runTransforms := func(input int) int {
+		value := input
+		for _, rules := range transforms {
+			for _, rule := range rules {
+				from := rule[0]
+				till := from + rule[2]
+				move := rule[1] - from
+				if value >= from && value < till {
+					value += move
+					break
 				}
 			}
-			for _, r := range ranges {
-				if v >= r[0] && v < r[0]+r[1] {
-					mu.Lock()
-					lowest = min(lowest, i)
-					count++
-					mu.Unlock()
+		}
+		for _, r := range ranges {
+			if value >= r[0] && value < r[0]+r[1] {
+				return input
+			}
+		}
+		return -1
+	}
+
+	eg := errgroup.Group{}
+	firstHit := int64(0)
+
+	// Use all cores and big steps to find the first hit.
+	numThreads := runtime.NumCPU()
+	stepSize := 1000
+	for i := 0; i < numThreads; i++ {
+		i := i
+		eg.Go(func() error {
+			for j := 0; j < 1000*stepSize; j++ {
+				if j%numThreads == i && runTransforms(j*stepSize) >= 0 {
+					atomic.StoreInt64(&firstHit, int64(j*stepSize))
 					break
 				}
 			}
@@ -106,8 +110,13 @@ func part2() int {
 	}
 
 	_ = eg.Wait()
-	if count == 0 {
-		return 0
+
+	// Go backwards to find the lowest result.
+	lowest := int(firstHit)
+	for ; lowest > 0; lowest-- {
+		if runTransforms(lowest-1) == -1 {
+			break
+		}
 	}
 
 	return lowest
@@ -124,5 +133,12 @@ func TestPart2(t *testing.T) {
 
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
+	}
+}
+
+func BenchmarkAll(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part1()
+		part2()
 	}
 }
