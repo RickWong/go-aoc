@@ -25,20 +25,16 @@ type Beam struct {
 	dy, dx int
 }
 
+type LUT map[int]struct{}
+
 // Helper functions.
 
-func makeLut(height int) map[int]map[int]int {
-	lut := make(map[int]map[int]int)
-	for y := 0; y < height; y++ {
-		lut[y] = make(map[int]int)
-	}
-	return lut
-}
-
-func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
-	beams := make([]Beam, 0, 128)
+func traceBeam(grid [][]byte, beam Beam) LUT {
+	beams := make([]Beam, 0, 1024)
 	history := make(map[Beam]bool, 1024)
-	lut := makeLut(len(grid))
+	height := len(grid)
+	width := len(grid[0])
+	lut := make(map[int]struct{}, height*width)
 
 	beams = append(beams, beam)
 	for len(beams) > 0 {
@@ -50,29 +46,27 @@ func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
 		}
 		history[beam] = true
 
-		steps := 0
-		for {
-			steps++
+		for steps := 1; ; steps++ {
 			y := beam.y + beam.dy*steps
 			x := beam.x + beam.dx*steps
-			if y < 0 || y >= len(grid) || x < 0 || x >= len(grid[0]) {
+			if y < 0 || y >= height || x < 0 || x >= width {
 				break
 			}
 
-			tile := grid[y][x]
-			lut[y][x]++
+			lut[y*width+x] = struct{}{}
 
-			if tile == "|" {
+			tile := grid[y][x]
+			if tile == '|' {
 				beams = append(beams, Beam{y, x, -1, 0})
 				beams = append(beams, Beam{y, x, 1, 0})
 				break
 			}
-			if tile == "-" {
+			if tile == '-' {
 				beams = append(beams, Beam{y, x, 0, -1})
 				beams = append(beams, Beam{y, x, 0, 1})
 				break
 			}
-			if tile == "/" {
+			if tile == '/' {
 				if beam.dy != 0 {
 					beams = append(beams, Beam{y, x, 0, -beam.dy})
 				} else {
@@ -80,7 +74,7 @@ func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
 				}
 				break
 			}
-			if tile == "\\" {
+			if tile == '\\' {
 				if beam.dy != 0 {
 					beams = append(beams, Beam{y, x, 0, beam.dy})
 				} else {
@@ -93,24 +87,14 @@ func traceBeam(grid [][]string, beam Beam) map[int]map[int]int {
 	return lut
 }
 
-func printAndSum(lut map[int]map[int]int) int {
-	sum := 0
-
-	for y := range lut {
-		sum += len(lut[y])
-	}
-
-	return sum
-}
-
 // Part 1.
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []byte { return []byte(line) })
 
 	lut := traceBeam(grid, Beam{0, -1, 0, 1})
-	sum := printAndSum(lut)
+	sum := len(lut)
 
 	return sum
 }
@@ -131,8 +115,7 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
-	sum := 0
+	grid := common.Map(lines, func(line string) []byte { return []byte(line) })
 
 	beams := make([]Beam, 0, 2*len(grid)+2*(len(grid[0])))
 	for y := range grid {
@@ -146,6 +129,7 @@ func part2() int {
 
 	eg := errgroup.Group{}
 	mu := sync.Mutex{}
+	sum := 0
 
 	for _, beam := range beams {
 		beam := beam
@@ -154,7 +138,7 @@ func part2() int {
 			lut := traceBeam(grid, beam)
 			mu.Lock()
 			defer mu.Unlock()
-			sum = max(sum, printAndSum(lut))
+			sum = max(sum, len(lut))
 			return nil
 		})
 	}
