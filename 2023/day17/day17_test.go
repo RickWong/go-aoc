@@ -37,8 +37,8 @@ type Trail struct {
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
 	grid := lo.Map(lines, func(line string, y int) []Block {
-		return lo.Map(strings.Split(line, ""), func(c string, x int) Block {
-			return Block{y, x, int(c[0] - '0')}
+		return lo.Map([]byte(line), func(c byte, x int) Block {
+			return Block{y, x, int(c - '0')}
 		})
 	})
 
@@ -96,13 +96,13 @@ func part1() int {
 			return cur.y == end.y && cur.x == end.x
 		},
 		func(cur *Trail) any {
-			return cur.y | cur.x<<10 | cur.direction<<20
+			return cur.y<<32 | cur.x<<16 | cur.direction
 		},
 		func(cur *Trail, _ float64) float64 {
 			return float64(cur.cumLoss)
 		},
 		func(cur *Trail) float64 {
-			return float64(end.y - cur.y + end.x - cur.x)
+			return float64(common.Manhattan(cur.x, cur.y, end.x, end.y))
 		},
 		0,
 		true,
@@ -129,8 +129,8 @@ func TestPart1(t *testing.T) {
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
 	grid := lo.Map(lines, func(line string, y int) []Block {
-		return lo.Map(strings.Split(line, ""), func(c string, x int) Block {
-			return Block{y, x, int(c[0] - '0')}
+		return lo.Map([]byte(line), func(c byte, x int) Block {
+			return Block{y, x, int(c - '0')}
 		})
 	})
 
@@ -196,13 +196,13 @@ func part2() int {
 			return cur.y == end.y && cur.x == end.x
 		},
 		func(cur *Trail) any {
-			return cur.y | cur.x<<10 | cur.direction<<20
+			return cur.y<<32 | cur.x<<16 | cur.direction
 		},
 		func(cur *Trail, _ float64) float64 {
 			return float64(cur.cumLoss)
 		},
 		func(cur *Trail) float64 {
-			return float64(end.y - cur.y + end.x - cur.x)
+			return float64(common.Manhattan(cur.x, cur.y, end.x, end.y))
 		},
 		0,
 		true,

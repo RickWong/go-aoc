@@ -55,9 +55,9 @@ func Product[T Number](collection []T) T {
 	return m
 }
 
-func Manhattan[T Number](a Point2D[T], b Point2D[T]) T {
-	diffY := b.y - a.y
-	diffX := b.x - a.x
+func Manhattan[T Number](x1 T, y1 T, x2 T, y2 T) T {
+	diffY := y2 - y1
+	diffX := x2 - x1
 	if diffY < 0 {
 		diffY = -diffY
 	}
@@ -67,10 +67,10 @@ func Manhattan[T Number](a Point2D[T], b Point2D[T]) T {
 	return diffY + diffX
 }
 
-func Pythagoras[T Number](a Point2D[T], b Point2D[T]) T {
-	diffY := b.y - a.y
-	diffX := b.x - a.x
-	return Sqrt(diffY*diffY + diffX*diffX)
+func Pythagoras[T Number](x1 T, y1 T, x2 T, y2 T) T {
+	diffY := y2 - y1
+	diffX := x2 - x1
+	return Sqrt[T](diffY*diffY + diffX*diffX)
 }
 
 func Sqrt[T Number](x T) (z T) {
