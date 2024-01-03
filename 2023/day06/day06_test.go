@@ -3,6 +3,8 @@ package day06
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/2021/common"
+	"golang.org/x/sync/errgroup"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -51,16 +53,30 @@ func part2() int {
 	lines := strings.Split(data, "\n")
 	time := common.Atoi(strings.Join(strings.Fields(lines[0])[1:], ""))
 	distance := common.Atoi(strings.Join(strings.Fields(lines[1])[1:], ""))
-	numWaysToWin := 0
 
-	for hold := 0; hold < time; hold++ {
-		remain := time - hold
-		if hold*remain > distance {
-			numWaysToWin++
-		}
+	eg := errgroup.Group{}
+	numThreads := runtime.NumCPU() * 2
+	eg.SetLimit(numThreads)
+	numWaysToWin := make([]int, numThreads)
+
+	for i := 0; i < numThreads; i++ {
+		i := i
+		eg.Go(func() error {
+			start := i * (time / numThreads)
+			end := (i + 1) * (time / numThreads)
+			for hold := start; hold < end; hold++ {
+				remain := time - hold
+				if hold*remain > distance {
+					numWaysToWin[i]++
+				}
+			}
+			return nil
+		})
 	}
 
-	return numWaysToWin
+	_ = eg.Wait()
+
+	return common.Sum(numWaysToWin)
 }
 
 func TestPart2(t *testing.T) {
@@ -74,5 +90,12 @@ func TestPart2(t *testing.T) {
 
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
+	}
+}
+
+func BenchmarkAll(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		part1()
+		part2()
 	}
 }
