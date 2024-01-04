@@ -31,31 +31,31 @@ func GCD(a, b int) int {
 	return a
 }
 
-type Point2D[T Number] struct {
-	x, y T
+type Point2D[N Number] struct {
+	x, y N
 }
 
 type Number interface {
 	constraints.Integer | constraints.Float
 }
 
-func Sum[T Number](collection []T) T {
-	var m T = 0
+func Sum[N Number](collection []N) N {
+	var m N = 0
 	for _, v := range collection {
 		m += v
 	}
 	return m
 }
 
-func Product[T Number](collection []T) T {
-	var m T = 1
+func Product[N Number](collection []N) N {
+	var m N = 1
 	for _, v := range collection {
 		m *= v
 	}
 	return m
 }
 
-func Manhattan[T Number](x1 T, y1 T, x2 T, y2 T) T {
+func Manhattan[N Number](x1 N, y1 N, x2 N, y2 N) N {
 	diffY := y2 - y1
 	diffX := x2 - x1
 	if diffY < 0 {
@@ -67,15 +67,15 @@ func Manhattan[T Number](x1 T, y1 T, x2 T, y2 T) T {
 	return diffY + diffX
 }
 
-func Pythagoras[T Number](x1 T, y1 T, x2 T, y2 T) T {
+func Pythagoras[N Number](x1 N, y1 N, x2 N, y2 N) N {
 	diffY := y2 - y1
 	diffX := x2 - x1
-	return Sqrt[T](diffY*diffY + diffX*diffX)
+	return Sqrt[N](diffY*diffY + diffX*diffX)
 }
 
-func Sqrt[T Number](x T) (z T) {
+func Sqrt[N Number](x N) (z N) {
 	z = 100.0
-	step := func() T {
+	step := func() N {
 		return z - (z*z-x)/(2*z)
 	}
 	for zz := step(); math.Abs(float64(zz-z)) > 0.00001; {

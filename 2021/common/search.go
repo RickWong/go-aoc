@@ -1,7 +1,7 @@
 package common
 
 import (
-	heap2 "github.com/zyedidia/generic/heap"
+	"github.com/zyedidia/generic/heap"
 	"slices"
 	"time"
 )
@@ -20,14 +20,14 @@ type heapItem[T any, W Number] struct {
 	branch   *T
 }
 
-func IterativeSearch[T any, W Number](
-	start *T,
+func IterativeSearch[T any, W Number, H Hashable](
+	root *T,
 	// branches are possible iterations based on the current branch.
 	branchFn func(branch *T) []*T,
 	// predicate terminates the search when true.
 	predicateFn func(branch *T) bool,
 	// identity is a map key that represents the unique iteration.
-	identityFn func(branch *T) any,
+	identityFn func(branch *T) H,
 	// weight is the absolute weight of the branch.
 	weightFn func(branch *T, currentWeight W) W,
 	// heuristic is a relative priority modifier.
@@ -43,16 +43,16 @@ func IterativeSearch[T any, W Number](
 	now := time.Now().UnixMilli()
 
 	lessFn := func(a *heapItem[T, W], b *heapItem[T, W]) bool { return a.priority < b.priority }
-	heap := heap2.New(lessFn)
-	beam := heap2.New(lessFn)
+	queue := heap.New(lessFn)
+	beam := heap.New(lessFn)
 
-	var trail = make(map[any]*T, 32)
-	var weights = make(map[any]W, 256)
+	trail := make(map[H]*T, 32)
+	weights := make(map[H]W, 1024)
 
-	heap.Push(&heapItem[T, W]{0, 0, start})
-	for heap.Size() > 0 {
+	queue.Push(&heapItem[T, W]{0, 0, root})
+	for queue.Size() > 0 {
 		result.Iterations++
-		current, _ := heap.Pop()
+		current, _ := queue.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
 			if result.Best == nil ||
@@ -75,12 +75,8 @@ func IterativeSearch[T any, W Number](
 				weight = weightFn(branch, current.weight)
 			}
 
-			var id any
 			if identityFn != nil {
-				id = identityFn(branch)
-			}
-
-			if id != nil {
+				id := identityFn(branch)
 				knownWeight, known := weights[id]
 				if known &&
 					((maximize && knownWeight >= weight) ||
@@ -104,13 +100,13 @@ func IterativeSearch[T any, W Number](
 			if beamWidth > 0 {
 				beam.Push(&heapItem[T, W]{priority, weight, branch})
 			} else {
-				heap.Push(&heapItem[T, W]{priority, weight, branch})
+				queue.Push(&heapItem[T, W]{priority, weight, branch})
 			}
 		}
 
 		for i := 0; i < beamWidth && beam.Size() > 0; i++ {
 			item, _ := beam.Pop()
-			heap.Push(item)
+			queue.Push(item)
 		}
 
 		// Clear the rest of the beam.
@@ -125,7 +121,7 @@ func IterativeSearch[T any, W Number](
 		for nextStep != nil {
 			nextStep = trail[identityFn(nextStep)]
 			result.Path = append(result.Path, nextStep)
-			if nextStep == start {
+			if nextStep == root {
 				break
 			}
 		}

@@ -3,7 +3,6 @@ package day17
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/2021/common"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -36,8 +35,8 @@ type Trail struct {
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := lo.Map(lines, func(line string, y int) []Block {
-		return lo.Map([]byte(line), func(c byte, x int) Block {
+	grid := common.Map2(lines, func(line string, y int) []Block {
+		return common.Map2([]byte(line), func(c byte, x int) Block {
 			return Block{y, x, int(c - '0')}
 		})
 	})
@@ -95,8 +94,8 @@ func part1() int {
 		func(cur *Trail) bool {
 			return cur.y == end.y && cur.x == end.x
 		},
-		func(cur *Trail) any {
-			return cur.y<<32 | cur.x<<16 | cur.direction
+		func(cur *Trail) uint64 {
+			return uint64(cur.y<<32 | cur.x<<16 | cur.direction)
 		},
 		func(cur *Trail, _ int) int {
 			return cur.cumLoss
@@ -128,8 +127,8 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := lo.Map(lines, func(line string, y int) []Block {
-		return lo.Map([]byte(line), func(c byte, x int) Block {
+	grid := common.Map2(lines, func(line string, y int) []Block {
+		return common.Map2([]byte(line), func(c byte, x int) Block {
 			return Block{y, x, int(c - '0')}
 		})
 	})
@@ -195,8 +194,8 @@ func part2() int {
 		func(cur *Trail) bool {
 			return cur.y == end.y && cur.x == end.x
 		},
-		func(cur *Trail) any {
-			return cur.y<<32 | cur.x<<16 | cur.direction
+		func(cur *Trail) uint64 {
+			return uint64(cur.y<<32 | cur.x<<16 | cur.direction)
 		},
 		func(cur *Trail, _ int) int {
 			return cur.cumLoss

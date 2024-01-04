@@ -1,6 +1,6 @@
 package common
 
-func AllValues[K, V comparable](c map[K]V, eq any) bool {
+func AllValues[K Hashable, V comparable](c map[K]V, eq any) bool {
 	for _, v := range c {
 		if v != eq {
 			return false
@@ -19,6 +19,14 @@ func Map[T, R any](collection []T, fn func(a T) R) []R {
 	m := make([]R, len(collection))
 	for i, v := range collection {
 		m[i] = fn(v)
+	}
+	return m
+}
+
+func Map2[T, R any](collection []T, fn func(a T, i int) R) []R {
+	m := make([]R, len(collection))
+	for i, v := range collection {
+		m[i] = fn(v, i)
 	}
 	return m
 }
