@@ -71,7 +71,7 @@ func part1() int {
 			springs, sizes_ := row[0], row[1]
 			sizes := common.Map(strings.Split(sizes_, ","), common.Atoi)
 
-			common.IterativeSearch(
+			common.IterativeSearch[Variant, int, int](
 				&Variant{springs, strings.Index(springs, "?")},
 				func(v *Variant) []*Variant {
 					if v.nextWildcard >= 0 {

@@ -74,8 +74,8 @@ func part1() int {
 		func(t *Trail) bool {
 			return t.Point == end
 		},
-		func(t *Trail) any {
-			return t.y<<16 | t.x
+		func(t *Trail) uint32 {
+			return uint32(t.y<<16 | t.x)
 		},
 		func(t *Trail, currentWeight float64) float64 {
 			return currentWeight + 1

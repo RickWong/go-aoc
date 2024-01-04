@@ -76,7 +76,7 @@ func part1() int {
 				grid[y][x] = &Hole{y, x, "outside"}
 
 				// Use search algorithm to fill.
-				common.IterativeSearch(
+				common.IterativeSearch[Point, int, uint64](
 					&Point{y, x},
 					func(cur *Point) []*Point {
 						branches := make([]*Point, 0, 4)
@@ -99,8 +99,8 @@ func part1() int {
 						return branches
 					},
 					nil,
-					func(cur *Point) any {
-						return (cur.y << 32) | (cur.x & 0xffffffff)
+					func(cur *Point) uint64 {
+						return uint64((cur.y << 32) | (cur.x & 0xffffffff))
 					},
 					nil,
 					nil,
