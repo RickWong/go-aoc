@@ -3,8 +3,7 @@ package day06
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/2021/common"
-	"golang.org/x/sync/errgroup"
-	"runtime"
+	"math"
 	"strings"
 	"testing"
 )
@@ -51,32 +50,13 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	time := common.Atoi(strings.Join(strings.Fields(lines[0])[1:], ""))
-	distance := common.Atoi(strings.Join(strings.Fields(lines[1])[1:], ""))
+	time := common.Atof(strings.Join(strings.Fields(lines[0])[1:], ""))
+	distance := common.Atof(strings.Join(strings.Fields(lines[1])[1:], ""))
 
-	eg := errgroup.Group{}
-	numThreads := runtime.NumCPU() * 2
-	eg.SetLimit(numThreads)
-	numWaysToWin := make([]int, numThreads)
+	maxRoot := math.Floor(time + math.Sqrt(time*time-4*distance)/2)
+	minRoot := math.Ceil(time - math.Sqrt(time*time-4*distance)/2)
 
-	for i := 0; i < numThreads; i++ {
-		i := i
-		eg.Go(func() error {
-			start := i * (time / numThreads)
-			end := (i + 1) * (time / numThreads)
-			for hold := start; hold < end; hold++ {
-				remain := time - hold
-				if hold*remain > distance {
-					numWaysToWin[i]++
-				}
-			}
-			return nil
-		})
-	}
-
-	_ = eg.Wait()
-
-	return common.Sum(numWaysToWin)
+	return int(maxRoot-minRoot) + 1
 }
 
 func TestPart2(t *testing.T) {
