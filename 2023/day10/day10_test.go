@@ -2,7 +2,6 @@ package day10
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -21,7 +20,7 @@ var data = Input
 type Point struct {
 	y, x     int
 	next     []*Point
-	tile     string
+	tile     byte
 	distance int
 	loop     bool
 }
@@ -37,7 +36,7 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 		points[y] = make([]*Point, len(lines[y]))
 
 		for x := 0; x < len(lines[y]); x++ {
-			points[y][x] = &Point{y, x, make([]*Point, 0, 4), string(lines[y][x]), 0, false}
+			points[y][x] = &Point{y, x, make([]*Point, 0, 4), lines[y][x], 0, false}
 
 			if start == nil && lines[y][x] == 'S' {
 				start = points[y][x]
@@ -47,13 +46,13 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 
 	AROUND := []struct {
 		y, x  int
-		self  string
-		match string
+		self  []byte
+		match []byte
 	}{
-		{1, 0, "S|7F", "|JL"},
-		{-1, 0, "S|JL", "|7F"},
-		{0, 1, "S-LF", "-J7"},
-		{0, -1, "S-J7", "-LF"},
+		{1, 0, []byte("S|7F"), []byte("|JL")},
+		{-1, 0, []byte("S|JL"), []byte("|7F")},
+		{0, 1, []byte("S-LF"), []byte("-J7")},
+		{0, -1, []byte("S-J7"), []byte("-LF")},
 	}
 
 	for y := 0; y < len(lines); y++ {
@@ -66,16 +65,18 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 				}
 
 				next := points[y+a.y][x+a.x]
-				if common.In(a.self, p.tile) && common.In(a.match, next.tile) {
-					p.next = append(p.next, next)
+				if p.tile == a.self[0] || p.tile == a.self[1] || p.tile == a.self[2] || p.tile == a.self[3] {
+					if next.tile == a.match[0] || next.tile == a.match[1] || next.tile == a.match[2] {
+						p.next = append(p.next, next)
+					}
 				}
 			}
 		}
 	}
 
-	safeGet := func(y, x int) string {
+	safeGet := func(y, x int) byte {
 		if y < 0 || y >= len(points) || x < 0 || x >= len(points[y]) {
-			return ""
+			return 0
 		}
 		return points[y][x].tile
 	}
@@ -86,22 +87,22 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 	leftStart := safeGet(start.y, start.x-1)
 
 	switch leftStart {
-	case "-", "F", "L":
+	case '-', 'F', 'L':
 		switch {
-		case aboveStart == "|", aboveStart == "7", aboveStart == "F":
-			start.tile = "J"
-		case belowStart == "|", belowStart == "J", belowStart == "L":
-			start.tile = "7"
+		case aboveStart == '|', aboveStart == '7', aboveStart == 'F':
+			start.tile = 'J'
+		case belowStart == '|', belowStart == 'J', belowStart == 'L':
+			start.tile = '7'
 		}
 	}
 
 	switch rightStart {
-	case "-", "J", "7":
+	case '-', 'J', '7':
 		switch {
-		case aboveStart == "|", aboveStart == "7", aboveStart == "F":
-			start.tile = "L"
-		case belowStart == "|", belowStart == "J", belowStart == "L":
-			start.tile = "F"
+		case aboveStart == '|', aboveStart == '7', aboveStart == 'F':
+			start.tile = 'L'
+		case belowStart == '|', belowStart == 'J', belowStart == 'L':
+			start.tile = 'F'
 		}
 	}
 
@@ -146,9 +147,9 @@ func TestPart1(t *testing.T) {
 	result := part1()
 
 	if data == Example {
-		assert.Equal(t, 80, result, "Result was incorrect")
+		assert.Equal(t, 80, result)
 	} else {
-		assert.Equal(t, 6778, result, "Result was incorrect")
+		assert.Equal(t, 6778, result)
 	}
 }
 
@@ -170,11 +171,11 @@ func part2() int {
 	//	println()
 	//}
 
-	endOfCorner := map[string]string{"F": "7", "L": "J"}
+	endOfCorner := map[byte]byte{'F': '7', 'L': 'J'}
 	n := 0
 
 	for y := 0; y < len(lines); y++ {
-		corner := ""
+		corner := byte(0)
 		inside := false
 		m := 0
 
@@ -189,21 +190,21 @@ func part2() int {
 			if points[y][x].loop {
 				switch points[y][x].tile {
 				// Loop border.
-				case "|":
+				case '|':
 					inside = !inside
-					corner = ""
+					corner = 0
 				// Track start of a corner.
-				case "F", "L":
-					if corner == "" {
+				case 'F', 'L':
+					if corner == 0 {
 						inside = !inside
 						corner = points[y][x].tile
 					}
 				// End of a corner.
-				case "7", "J":
+				case '7', 'J':
 					if points[y][x].tile == endOfCorner[corner] {
 						inside = !inside
 					}
-					corner = ""
+					corner = 0
 				}
 			}
 		}
@@ -220,9 +221,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 10, result, "Result was incorrect")
+		assert.Equal(t, 10, result)
 	} else {
-		assert.Equal(t, 433, result, "Result was incorrect")
+		assert.Equal(t, 433, result)
 	}
 }
 
