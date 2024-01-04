@@ -98,11 +98,11 @@ func part1() int {
 		func(cur *Trail) any {
 			return cur.y<<32 | cur.x<<16 | cur.direction
 		},
-		func(cur *Trail, _ float64) float64 {
-			return float64(cur.cumLoss)
+		func(cur *Trail, _ int) int {
+			return cur.cumLoss
 		},
-		func(cur *Trail) float64 {
-			return float64(common.Manhattan(cur.x, cur.y, end.x, end.y))
+		func(cur *Trail) int {
+			return common.Manhattan(cur.x, cur.y, end.x, end.y)
 		},
 		0,
 		true,
@@ -198,11 +198,11 @@ func part2() int {
 		func(cur *Trail) any {
 			return cur.y<<32 | cur.x<<16 | cur.direction
 		},
-		func(cur *Trail, _ float64) float64 {
-			return float64(cur.cumLoss)
+		func(cur *Trail, _ int) int {
+			return cur.cumLoss
 		},
-		func(cur *Trail) float64 {
-			return float64(common.Manhattan(cur.x, cur.y, end.x, end.y))
+		func(cur *Trail) int {
+			return common.Manhattan(cur.x, cur.y, end.x, end.y)
 		},
 		0,
 		true,

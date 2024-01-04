@@ -6,21 +6,21 @@ import (
 	"time"
 )
 
-type SearchResult[T any] struct {
+type SearchResult[T any, W Number] struct {
 	Best         *T
-	BestWeight   float64
+	BestWeight   W
 	Path         []*T
 	Milliseconds int64
 	Iterations   int
 }
 
-type heapItem[T any] struct {
-	priority float64
-	weight   float64
+type heapItem[T any, W Number] struct {
+	priority W
+	weight   W
 	branch   *T
 }
 
-func IterativeSearch[T any](
+func IterativeSearch[T any, W Number](
 	start *T,
 	// branches are possible iterations based on the current branch.
 	branchFn func(branch *T) []*T,
@@ -29,27 +29,27 @@ func IterativeSearch[T any](
 	// identity is a map key that represents the unique iteration.
 	identityFn func(branch *T) any,
 	// weight is the absolute weight of the branch.
-	weightFn func(branch *T, currentWeight float64) float64,
+	weightFn func(branch *T, currentWeight W) W,
 	// heuristic is a relative priority modifier.
-	heuristicFn func(branch *T) float64,
+	heuristicFn func(branch *T) W,
 	// beam width limits search space on each iteration.
 	beamWidth int,
 	// returnFirst terminates the search after the first result.
 	returnFirst bool,
 	// maximize true will search for the highest weight.
 	maximize bool,
-) *SearchResult[T] {
-	result := &SearchResult[T]{nil, 0, nil, 0, 0}
+) *SearchResult[T, W] {
+	result := &SearchResult[T, W]{nil, 0, nil, 0, 0}
 	now := time.Now().UnixMilli()
 
-	lessFn := func(a *heapItem[T], b *heapItem[T]) bool { return a.priority < b.priority }
+	lessFn := func(a *heapItem[T, W], b *heapItem[T, W]) bool { return a.priority < b.priority }
 	heap := heap2.New(lessFn)
 	beam := heap2.New(lessFn)
 
 	var trail = make(map[any]*T, 32)
-	var weights = make(map[any]float64, 256)
+	var weights = make(map[any]W, 256)
 
-	heap.Push(&heapItem[T]{0, 0, start})
+	heap.Push(&heapItem[T, W]{0, 0, start})
 	for heap.Size() > 0 {
 		result.Iterations++
 		current, _ := heap.Pop()
@@ -102,9 +102,9 @@ func IterativeSearch[T any](
 			}
 
 			if beamWidth > 0 {
-				beam.Push(&heapItem[T]{priority, weight, branch})
+				beam.Push(&heapItem[T, W]{priority, weight, branch})
 			} else {
-				heap.Push(&heapItem[T]{priority, weight, branch})
+				heap.Push(&heapItem[T, W]{priority, weight, branch})
 			}
 		}
 
