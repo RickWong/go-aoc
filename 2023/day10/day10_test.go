@@ -29,17 +29,18 @@ type Point struct {
 
 // Part 1.
 
-func parsePoints(lines []string) (start *Point, points [][]*Point) {
-	points = make([][]*Point, len(lines))
+func parsePoints(lines []string) (start *Point, points []*Point) {
+	height := len(lines)
+	width := len(lines[0])
+	points = make([]*Point, height*width)
 
-	for y := 0; y < len(lines); y++ {
-		points[y] = make([]*Point, len(lines[y]))
-
-		for x := 0; x < len(lines[y]); x++ {
-			points[y][x] = &Point{y, x, make([]*Point, 0, 4), lines[y][x], 0, false}
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			idx := y*width + x
+			points[idx] = &Point{y, x, make([]*Point, 0, 4), lines[y][x], 0, false}
 
 			if start == nil && lines[y][x] == 'S' {
-				start = points[y][x]
+				start = points[idx]
 			}
 		}
 	}
@@ -55,16 +56,18 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 		{0, -1, []byte("S-J7"), []byte("-LF")},
 	}
 
-	for y := 0; y < len(lines); y++ {
-		for x := 0; x < len(lines[y]); x++ {
-			p := points[y][x]
+	for y := 0; y < height; y++ {
+		for x := 0; x < width; x++ {
+			idx := y*width + x
+			p := points[idx]
 
 			for _, a := range AROUND {
 				if y+a.y < 0 || y+a.y >= len(lines) || x+a.x < 0 || x+a.x >= len(lines[y]) {
 					continue
 				}
 
-				next := points[y+a.y][x+a.x]
+				idx := (y+a.y)*width + (x + a.x)
+				next := points[idx]
 				if p.tile == a.self[0] || p.tile == a.self[1] || p.tile == a.self[2] || p.tile == a.self[3] {
 					if next.tile == a.match[0] || next.tile == a.match[1] || next.tile == a.match[2] {
 						p.next = append(p.next, next)
@@ -75,10 +78,11 @@ func parsePoints(lines []string) (start *Point, points [][]*Point) {
 	}
 
 	safeGet := func(y, x int) byte {
-		if y < 0 || y >= len(points) || x < 0 || x >= len(points[y]) {
+		if y < 0 || y >= height || x < 0 || x >= width {
 			return 0
 		}
-		return points[y][x].tile
+		idx := y*width + x
+		return points[idx].tile
 	}
 
 	belowStart := safeGet(start.y+1, start.x)
@@ -119,19 +123,19 @@ func part1() int {
 func calculateDistances(start *Point, size int) int {
 	unvisited := make([]*Point, 0, size)
 	unvisited = append(unvisited, start)
-	visited := make(map[*Point]bool, size)
+	visited := make(map[uint32]bool, size)
 	maxDistance := 0
 
 	for len(unvisited) > 0 {
 		current := unvisited[0]
 		unvisited = unvisited[1:]
-		visited[current] = true
+		visited[uint32(current.y<<8|current.x)] = true
 
 		current.loop = true
+		maxDistance = max(maxDistance, current.distance)
 
 		for _, next := range current.next {
-			if !visited[next] {
-				maxDistance = max(maxDistance, current.distance+1)
+			if !visited[uint32(next.y<<8|next.x)] {
 				next.distance = current.distance + 1
 				unvisited = append(unvisited, next)
 			}
@@ -162,8 +166,9 @@ func part2() int {
 
 	//for y := 0; y < len(lines); y++ {
 	//	for x := 0; x < len(points[y]); x++ {
-	//		if points[y][x].loop {
-	//			print(points[y][x].tile)
+	//idx := y*width + x
+	//		if points[idx].loop {
+	//			print(points[idx].tile)
 	//		} else {
 	//			print("_")
 	//		}
@@ -174,21 +179,25 @@ func part2() int {
 	endOfCorner := map[byte]byte{'F': '7', 'L': 'J'}
 	n := 0
 
-	for y := 0; y < len(lines); y++ {
+	height := len(lines)
+	width := len(lines[0])
+
+	for y := 0; y < height; y++ {
 		corner := byte(0)
 		inside := false
 		m := 0
 
-		for x := 0; x < len(lines[y]); x++ {
+		for x := 0; x < width; x++ {
+			idx := y*width + x
 			// Inside loop and not part of the loop.
-			if inside && !points[y][x].loop {
+			if inside && !points[idx].loop {
 				m++
 				continue
 			}
 
 			// Crossing part of the loop.
-			if points[y][x].loop {
-				switch points[y][x].tile {
+			if points[idx].loop {
+				switch points[idx].tile {
 				// Loop border.
 				case '|':
 					inside = !inside
@@ -197,11 +206,11 @@ func part2() int {
 				case 'F', 'L':
 					if corner == 0 {
 						inside = !inside
-						corner = points[y][x].tile
+						corner = points[idx].tile
 					}
 				// End of a corner.
 				case '7', 'J':
-					if points[y][x].tile == endOfCorner[corner] {
+					if points[idx].tile == endOfCorner[corner] {
 						inside = !inside
 					}
 					corner = 0
