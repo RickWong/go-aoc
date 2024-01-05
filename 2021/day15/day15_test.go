@@ -52,7 +52,7 @@ func part1() int {
 		true,
 	)
 
-	return lo.Sum(lo.Map(result.Path[1:], func(p *Position, _ int) int {
+	return lo.Sum(lo.Map(result.BestPath[1:], func(p *Position, _ int) int {
 		return p.risk
 	}))
 }
@@ -133,7 +133,7 @@ func part2() int {
 		true,
 	)
 
-	return lo.Sum(lo.Map(result.Path[1:], func(p *Position, _ int) int {
+	return lo.Sum(lo.Map(result.BestPath[1:], func(p *Position, _ int) int {
 		return p.risk
 	}))
 }

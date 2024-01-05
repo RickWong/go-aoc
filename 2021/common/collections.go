@@ -15,17 +15,27 @@ func Reset[T any](c *[]T) {
 	*c = (*c)[:0:capacity]
 }
 
-func Map[T, R any](collection []T, fn func(a T) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
+func Filter[T any](list []T, fn func(a T) bool) []T {
+	l := make([]T, 0, len(list)/2)
+	for _, item := range list {
+		if fn(item) {
+			l = append(l, item)
+		}
+	}
+	return l
+}
+
+func Map[T, R any](list []T, fn func(a T) R) []R {
+	m := make([]R, len(list))
+	for i, v := range list {
 		m[i] = fn(v)
 	}
 	return m
 }
 
-func Map2[T, R any](collection []T, fn func(a T, i int) R) []R {
-	m := make([]R, len(collection))
-	for i, v := range collection {
+func Map2[T, R any](list []T, fn func(a T, i int) R) []R {
+	m := make([]R, len(list))
+	for i, v := range list {
 		m[i] = fn(v, i)
 	}
 	return m

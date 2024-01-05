@@ -9,7 +9,8 @@ import (
 type SearchResult[T any, W Number] struct {
 	Best         *T
 	BestWeight   W
-	Path         []*T
+	BestPath     []*T
+	Paths        int
 	Milliseconds int64
 	Iterations   int
 }
@@ -20,7 +21,7 @@ type heapItem[T any, W Number] struct {
 	branch   *T
 }
 
-func IterativeSearch[T any, W Number, H Hashable](
+func IterativeSearch[T any, H Hashable, W Number](
 	root *T,
 	// branches are possible iterations based on the current branch.
 	branchFn func(branch *T) []*T,
@@ -29,7 +30,7 @@ func IterativeSearch[T any, W Number, H Hashable](
 	// identity is a map key that represents the unique iteration.
 	identityFn func(branch *T) H,
 	// weight is the absolute weight of the branch.
-	weightFn func(branch *T, currentWeight W) W,
+	weightFn func(branch *T, parentWeight W) W,
 	// heuristic is a relative priority modifier.
 	heuristicFn func(branch *T) W,
 	// beam width limits search space on each iteration.
@@ -39,7 +40,7 @@ func IterativeSearch[T any, W Number, H Hashable](
 	// maximize true will search for the highest weight.
 	maximize bool,
 ) *SearchResult[T, W] {
-	result := &SearchResult[T, W]{nil, 0, nil, 0, 0}
+	result := &SearchResult[T, W]{nil, 0, nil, 0, 0, 0}
 	now := time.Now().UnixMilli()
 
 	lessFn := func(a *heapItem[T, W], b *heapItem[T, W]) bool { return a.priority < b.priority }
@@ -55,6 +56,8 @@ func IterativeSearch[T any, W Number, H Hashable](
 		current, _ := queue.Pop()
 
 		if predicateFn != nil && predicateFn(current.branch) {
+			result.Paths++
+
 			if result.Best == nil ||
 				(maximize && current.weight > result.BestWeight) ||
 				(!maximize && current.weight < result.BestWeight) {
@@ -69,7 +72,8 @@ func IterativeSearch[T any, W Number, H Hashable](
 			continue
 		}
 
-		for _, branch := range branchFn(current.branch) {
+		branches := branchFn(current.branch)
+		for _, branch := range branches {
 			weight := current.weight
 			if weightFn != nil {
 				weight = weightFn(branch, current.weight)
@@ -116,16 +120,16 @@ func IterativeSearch[T any, W Number, H Hashable](
 	}
 
 	if result.Best != nil && identityFn != nil {
-		result.Path = append(result.Path, result.Best)
+		result.BestPath = append(result.BestPath, result.Best)
 		nextStep := result.Best
 		for nextStep != nil {
 			nextStep = trail[identityFn(nextStep)]
-			result.Path = append(result.Path, nextStep)
+			result.BestPath = append(result.BestPath, nextStep)
 			if nextStep == root {
 				break
 			}
 		}
-		slices.Reverse(result.Path)
+		slices.Reverse(result.BestPath)
 	}
 
 	result.Milliseconds = time.Now().UnixMilli() - now
