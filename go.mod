@@ -7,8 +7,11 @@ require (
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/modern-go/concurrent v0.0.0-20180228061459-e0a39a4cb421 // indirect
+	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rakyll/gotest v0.0.6 // indirect
 	github.com/samber/lo v1.39.0 // indirect

@@ -1,7 +1,9 @@
 package common
 
 import (
-	"fmt"
+	jsoniter "github.com/json-iterator/go"
+	"hash/fnv"
+	"strconv"
 )
 
 type MemoOptions[Out any] struct {
@@ -22,7 +24,10 @@ func Memo[A, Out any](f func(a A) Out, opts *MemoOptions[Out]) func(a A) Out {
 		if opts.Hash != nil {
 			key = opts.Hash(a)
 		} else {
-			key = fmt.Sprint(a)
+			bytes, _ := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(&a)
+			hash := fnv.New32a()
+			_, _ = hash.Write(bytes)
+			key = strconv.Itoa(int(hash.Sum32()))
 		}
 		if v, ok := opts.Cache[key]; ok {
 			return v
