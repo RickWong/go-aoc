@@ -85,7 +85,7 @@ func part1() int {
 	pageSize := len(lines) / numThreads
 	for i := 0; i < numThreads; i++ {
 		i := i
-		caches[i] = make(map[string]int, 256)
+		caches[i] = make(map[string]int, 1024)
 		start := i * pageSize
 		end := (i + 1) * pageSize
 		page := lines[start:end:end]
@@ -137,7 +137,7 @@ func part2() int {
 	pageSize := len(lines) / numThreads
 	for i := 0; i < numThreads; i++ {
 		i := i
-		caches[i] = make(map[string]int, 1024)
+		caches[i] = make(map[string]int, 64*1024)
 		start := i * pageSize
 		end := (i + 1) * pageSize
 		page := lines[start:end:end]
