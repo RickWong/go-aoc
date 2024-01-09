@@ -21,122 +21,88 @@ var data = Input
 
 // Data types.
 
-type SearchState struct {
-	steps          int
-	hashes         int
-	numGroupsFound int
-}
-
 // Helper functions.
 
-func countPossiblePaths(springs string, groups []int) *common.SearchResult[SearchState, int32] {
-	res := common.IterativeSearch[SearchState, int, int32](
-		&SearchState{0, 0, 0},
-		func(state *SearchState) []*SearchState {
-			// Arrived at the end but didn't find all groups.
-			if state.steps >= len(springs) {
-				return nil
-			}
+func memoizedCountPossible(opts *common.MemoOptions[int]) func(string, []int) int {
+	var countPossible func(string, []int) int
 
-			// Found all groups but not at the end yet. Skip to end, unless more #.
-			if state.numGroupsFound == len(groups) {
-				if strings.Contains(springs[state.steps:], "#") {
-					return nil
-				}
+	countPossible = common.Memo2(
+		func(s string, c []int) int {
+			s = strings.TrimLeft(s, ".")
 
-				return []*SearchState{
-					{len(springs), 0, state.numGroupsFound},
+			if len(s) == 0 {
+				if len(c) == 0 {
+					return 1
+				} else {
+					return 0
 				}
 			}
 
-			for i := state.steps; i < len(springs); i++ {
-				if springs[i] == '#' {
-					if state.hashes < groups[state.numGroupsFound] {
-						state.hashes++
-
-						if i == len(springs)-1 && state.hashes == groups[state.numGroupsFound] {
-							return []*SearchState{
-								{i + 1, 0, state.numGroupsFound + 1},
-							}
-						}
-						continue
-					}
-					return nil
-				}
-
-				if springs[i] == '.' {
-					if state.hashes == 0 {
-						continue
-					}
-					if state.hashes == groups[state.numGroupsFound] {
-						return []*SearchState{
-							{i + 1, 0, state.numGroupsFound + 1},
-						}
-					}
-					return nil
-				}
-
-				if springs[i] == '?' {
-					branches := make([]*SearchState, 0, 2)
-
-					if state.hashes < groups[state.numGroupsFound] {
-						if i == len(springs)-1 && state.hashes+1 == groups[state.numGroupsFound] {
-							return []*SearchState{
-								{i + 1, 0, state.numGroupsFound + 1},
-							}
-						}
-
-						branches = append(branches,
-							&SearchState{i + 1, state.hashes + 1, state.numGroupsFound})
-					}
-
-					if state.hashes == 0 {
-						branches = append(branches,
-							&SearchState{i + 1, 0, state.numGroupsFound})
-					} else if state.hashes == groups[state.numGroupsFound] {
-						branches = append(branches,
-							&SearchState{i + 1, 0, state.numGroupsFound + 1})
-					}
-
-					return branches
+			if len(c) == 0 {
+				if strings.Contains(s, "#") {
+					return 0
+				} else {
+					return 1
 				}
 			}
 
-			return nil
-		},
-		func(state *SearchState) bool {
-			return state.steps == len(springs) && state.numGroupsFound == len(groups)
-		},
-		nil,
-		nil,
-		func(state *SearchState) int32 {
-			return -int32(state.numGroupsFound)*10 - int32(state.hashes)
-		},
-		0,
-		false,
-		false,
-	)
-	return res
+			if s[0] == '#' {
+				if len(s) < c[0] || strings.Contains(s[:c[0]], ".") {
+					return 0
+				}
+
+				if len(s) == c[0] {
+					if len(c) == 1 {
+						return 1
+					} else {
+						return 0
+					}
+				}
+
+				if s[c[0]] == '#' {
+					return 0
+				}
+
+				return countPossible(s[c[0]+1:], c[1:])
+			}
+
+			return countPossible("#"+s[1:], c) + countPossible(s[1:], c)
+		}, opts)
+
+	return countPossible
 }
 
 // Part 1.
 
 func part1() int {
 	lines := strings.Split(data, "\n")
+	numThreads := runtime.NumCPU()
 	eg := errgroup.Group{}
-	eg.SetLimit(runtime.NumCPU())
+	eg.SetLimit(numThreads)
 	sum := int64(0)
 
-	for _, line := range lines {
-		row := strings.Split(line, " ")
+	caches := make([]map[string]int, numThreads)
+	pageSize := len(lines) / numThreads
+	for i := 0; i < numThreads; i++ {
+		i := i
+		caches[i] = make(map[string]int, 256)
+		start := i * pageSize
+		end := (i + 1) * pageSize
+		page := lines[start:end:end]
 
 		eg.Go(func() error {
-			springs, sizes := row[0], row[1]
-			groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+			for _, line := range page {
+				row := strings.Split(line, " ")
 
-			res := countPossiblePaths(springs, groups)
-			if res.Paths >= 0 {
-				atomic.AddInt64(&sum, int64(res.Paths))
+				springs := row[0]
+				sizes := row[1]
+				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+				countPossible := memoizedCountPossible(&common.MemoOptions[int]{Cache: caches[i]})
+
+				res := countPossible(springs, groups)
+				if res >= 0 {
+					atomic.AddInt64(&sum, int64(res))
+				}
 			}
 			return nil
 		})
@@ -162,21 +128,33 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
+	numThreads := runtime.NumCPU()
 	eg := errgroup.Group{}
-	eg.SetLimit(runtime.NumCPU())
+	eg.SetLimit(numThreads)
 	sum := int64(0)
 
-	for _, line := range lines {
-		row := strings.Split(line, " ")
+	caches := make([]map[string]int, numThreads)
+	pageSize := len(lines) / numThreads
+	for i := 0; i < numThreads; i++ {
+		i := i
+		caches[i] = make(map[string]int, 1024)
+		start := i * pageSize
+		end := (i + 1) * pageSize
+		page := lines[start:end:end]
 
 		eg.Go(func() error {
-			springs := row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0]
-			sizes := row[1] + "," + row[1] + "," + row[1] + "," + row[1] + "," + row[1]
-			groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+			for _, line := range page {
+				row := strings.Split(line, " ")
 
-			res := countPossiblePaths(springs, groups)
-			if res.Paths >= 0 {
-				atomic.AddInt64(&sum, int64(res.Paths))
+				springs := row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0]
+				sizes := row[1] + "," + row[1] + "," + row[1] + "," + row[1] + "," + row[1]
+				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+				countPossible := memoizedCountPossible(&common.MemoOptions[int]{Cache: caches[i]})
+
+				res := countPossible(springs, groups)
+				if res >= 0 {
+					atomic.AddInt64(&sum, int64(res))
+				}
 			}
 			return nil
 		})
@@ -194,7 +172,7 @@ func TestPart2(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 525152, result)
 	} else {
-		assert.Equal(t, 525152, result)
+		assert.Equal(t, 25470469710341, result)
 	}
 }
 
