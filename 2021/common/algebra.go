@@ -32,7 +32,7 @@ func GCD(a, b int) int {
 }
 
 type Point2D[N Number] struct {
-	x, y N
+	X, Y N
 }
 
 type Number interface {
@@ -83,4 +83,19 @@ func Sqrt[N Number](x N) (z N) {
 		zz = step()
 	}
 	return
+}
+
+func Shoelace[N Number](points []Point2D[N]) float64 {
+	P := len(points)
+	sum := N(0)
+	for p := 0; p < len(points); p++ {
+		p1 := points[p]
+		p2 := points[(p+1)%P]
+		sum += p1.X*p2.Y - p2.X*p1.Y
+	}
+	return math.Abs(float64(sum)) / 2
+}
+
+func PicksInterior[N Number](area N, boundary N) N {
+	return area - boundary/2 + 1
 }

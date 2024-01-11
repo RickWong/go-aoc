@@ -19,6 +19,11 @@ func Atof(s string) float64 {
 	return v
 }
 
+func Hexi(s string) int {
+	v, _ := strconv.ParseInt(s, 16, 64)
+	return int(v)
+}
+
 func NonZero(i int) int {
 	if i != 0 {
 		return 1

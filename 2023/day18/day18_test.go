@@ -18,13 +18,18 @@ var data = Input
 
 // Data types.
 
-type Point struct {
-	y, x int
+var deltas = map[byte][2]int{
+	'R': {0, 1},
+	'L': {0, -1},
+	'D': {1, 0},
+	'U': {-1, 0},
 }
 
-type Hole struct {
-	y, x  int
-	color string
+var directions = map[byte]byte{
+	'0': 'R',
+	'1': 'D',
+	'2': 'L',
+	'3': 'U',
 }
 
 // Helper functions.
@@ -33,95 +38,27 @@ type Hole struct {
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	deltas := map[byte][2]int{
-		'R': {0, 1},
-		'L': {0, -1},
-		'D': {1, 0},
-		'U': {-1, 0},
-	}
-
-	y, x := 0, 0
-	minY, minX := 0, 0
-	maxY, maxX := 0, 0
-	grid := make(map[int]map[int]*Hole)
-	grid[y] = map[int]*Hole{x: {y, x, ""}}
+	points := make([]common.Point2D[int], 1, 128)
+	points[0] = common.Point2D[int]{X: 0, Y: 0}
+	boundary := 0
 
 	for _, line := range lines {
 		parts := strings.Fields(line)
-		direction, meters, color := parts[0][0], common.Atoi(parts[1]), parts[2][1:len(parts[2])-1]
+		direction, meters := parts[0][0], common.Atoi(parts[1])
 
-		for i := 0; i < meters; i++ {
-			y += deltas[direction][0]
-			x += deltas[direction][1]
-			minY, minX = min(minY, y), min(minX, x)
-			maxY, maxX = max(maxY, y), max(maxX, x)
-
-			if grid[y] == nil {
-				grid[y] = make(map[int]*Hole)
-			}
-			grid[y][x] = &Hole{y, x, color}
+		lastPoint := points[len(points)-1]
+		newPoint := common.Point2D[int]{
+			Y: lastPoint.Y + deltas[direction][0]*meters,
+			X: lastPoint.X + deltas[direction][1]*meters,
 		}
+		points = append(points, newPoint)
+		boundary += meters
 	}
 
-	// Add top and bottom borders.
-	grid[minY-1] = make(map[int]*Hole)
-	grid[maxY+1] = make(map[int]*Hole)
+	area := int(common.Shoelace(points))
+	interior := common.PicksInterior(area, boundary)
 
-	// Fill starting at the borders.
-	for y := minY - 1; y <= maxY+1; y++ {
-		for x := minX - 1; x <= maxX+1; x++ {
-			isBorder := y == minY-1 || y == maxY+1 || x == minX-1 || x == maxX+1
-
-			if isBorder {
-				grid[y][x] = &Hole{y, x, "outside"}
-
-				// Use search algorithm to fill.
-				common.IterativeSearch[Point, int, uint64](
-					&Point{y, x},
-					func(cur *Point) []*Point {
-						branches := make([]*Point, 0, 4)
-						if cur.y > minY-1 && grid[cur.y-1][cur.x] == nil {
-							grid[cur.y-1][cur.x] = &Hole{cur.y - 1, cur.x, "outside"}
-							branches = append(branches, &Point{cur.y - 1, cur.x})
-						}
-						if cur.y < maxY+1 && grid[cur.y+1][cur.x] == nil {
-							grid[cur.y+1][cur.x] = &Hole{cur.y + 1, cur.x, "outside"}
-							branches = append(branches, &Point{cur.y + 1, cur.x})
-						}
-						if cur.x > minX-1 && grid[cur.y][cur.x-1] == nil {
-							grid[cur.y][cur.x-1] = &Hole{cur.y, cur.x - 1, "outside"}
-							branches = append(branches, &Point{cur.y, cur.x - 1})
-						}
-						if cur.x < maxX+1 && grid[cur.y][cur.x+1] == nil {
-							grid[cur.y][cur.x+1] = &Hole{cur.y, cur.x + 1, "outside"}
-							branches = append(branches, &Point{cur.y, cur.x + 1})
-						}
-						return branches
-					},
-					nil,
-					func(cur *Point) uint64 {
-						return uint64((cur.y << 32) | (cur.x & 0xffffffff))
-					},
-					nil,
-					nil,
-					0,
-					false,
-					false,
-				)
-			}
-		}
-	}
-
-	sum := 0
-	for y := minY - 1; y <= maxY+1; y++ {
-		for x := minX - 1; x <= maxX+1; x++ {
-			if grid[y][x] == nil || grid[y][x].color != "outside" {
-				sum++
-			}
-		}
-	}
-
-	return sum
+	return boundary + interior
 }
 
 func TestPart1(t *testing.T) {
@@ -130,17 +67,39 @@ func TestPart1(t *testing.T) {
 	result := part1()
 
 	if data == Example {
-		assert.Equal(t, 62, result, "Result was incorrect")
+		assert.Equal(t, 62, result)
 	} else {
 		// 28290 is too low.
-		assert.Equal(t, 47527, result, "Result was incorrect")
+		assert.Equal(t, 47527, result)
 	}
 }
 
 // Part 2.
 
 func part2() int {
-	return 0
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	points := make([]common.Point2D[int], 1, 128)
+	points[0] = common.Point2D[int]{X: 0, Y: 0}
+	boundary := 0
+
+	for _, line := range lines {
+		parts := strings.Fields(line)
+		color := parts[2][2 : len(parts[2])-1]
+		direction, meters := directions[color[5]], common.Hexi(color[0:5])
+
+		lastPoint := points[len(points)-1]
+		newPoint := common.Point2D[int]{
+			Y: lastPoint.Y + deltas[direction][0]*meters,
+			X: lastPoint.X + deltas[direction][1]*meters,
+		}
+		points = append(points, newPoint)
+		boundary += meters
+	}
+
+	area := int(common.Shoelace(points))
+	interior := common.PicksInterior(area, boundary)
+
+	return boundary + interior
 }
 
 func TestPart2(t *testing.T) {
@@ -149,9 +108,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 82000210, result, "Result was incorrect")
+		assert.Equal(t, 952408144115, result)
 	} else {
-		assert.Equal(t, 357134560737, result, "Result was incorrect")
+		assert.Equal(t, 52240187443190, result)
 	}
 }
 
