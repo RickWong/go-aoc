@@ -2,7 +2,7 @@ package day09
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
+	common2 "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"slices"
 	"strings"
@@ -49,7 +49,7 @@ func part1() int {
 	sum := 0
 
 	for _, line := range lines {
-		numbers := common.Map(strings.Fields(line), common.Atoi)
+		numbers := common2.Map(strings.Fields(line), common2.Atoi)
 
 		current := numbers
 		sum += current[len(current)-1]
@@ -87,7 +87,7 @@ func part2() int {
 	for _, line := range lines {
 		// Extrapolating backward is the same as extrapolating forward the reversed sequence.
 		// By reversing the sequence we can reuse the exact logic in part 1.
-		numbers := common.Map(strings.Fields(line), common.Atoi)
+		numbers := common2.Map(strings.Fields(line), common2.Atoi)
 		slices.Reverse(numbers)
 
 		current := numbers

@@ -2,7 +2,7 @@ package day22
 
 import (
 	_ "embed"
-	. "github.com/RickWong/go-aoc/2021/common"
+	. "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 	"regexp"

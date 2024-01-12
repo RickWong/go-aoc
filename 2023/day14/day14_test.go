@@ -2,7 +2,7 @@ package day14
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
+	"github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"hash/crc32"
 	"strings"

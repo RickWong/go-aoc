@@ -2,7 +2,7 @@ package day17
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
+	common2 "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -35,15 +35,15 @@ type Trail struct {
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := common.Map2(lines, func(line string, y int) []Block {
-		return common.Map2([]byte(line), func(c byte, x int) Block {
+	grid := common2.Map2(lines, func(line string, y int) []Block {
+		return common2.Map2([]byte(line), func(c byte, x int) Block {
 			return Block{y, x, int(c - '0')}
 		})
 	})
 
 	start := Trail{}
 	end := &grid[len(grid)-1][len(grid[0])-1]
-	result := common.IterativeSearch(
+	result := common2.IterativeSearch(
 		&start,
 		func(cur *Trail) []*Trail {
 			minSteps := 1
@@ -101,7 +101,7 @@ func part1() int {
 			return cur.cumLoss
 		},
 		func(cur *Trail) int {
-			return common.Manhattan(cur.x, cur.y, end.x, end.y)
+			return common2.Manhattan(cur.x, cur.y, end.x, end.y)
 		},
 		0,
 		true,
@@ -127,15 +127,15 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := common.Map2(lines, func(line string, y int) []Block {
-		return common.Map2([]byte(line), func(c byte, x int) Block {
+	grid := common2.Map2(lines, func(line string, y int) []Block {
+		return common2.Map2([]byte(line), func(c byte, x int) Block {
 			return Block{y, x, int(c - '0')}
 		})
 	})
 
 	start := Trail{}
 	end := &grid[len(grid)-1][len(grid[0])-1]
-	result := common.IterativeSearch(
+	result := common2.IterativeSearch(
 		&start,
 		func(cur *Trail) []*Trail {
 			minSteps := 4
@@ -201,7 +201,7 @@ func part2() int {
 			return cur.cumLoss
 		},
 		func(cur *Trail) int {
-			return common.Manhattan(cur.x, cur.y, end.x, end.y)
+			return common2.Manhattan(cur.x, cur.y, end.x, end.y)
 		},
 		0,
 		true,

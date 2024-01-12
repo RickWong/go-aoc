@@ -2,7 +2,7 @@ package day12
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
+	common2 "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 	"runtime"
@@ -23,10 +23,10 @@ var data = Input
 
 // Helper functions.
 
-func memoizedCountPossible(opts *common.MemoOptions[int]) func(string, []int) int {
+func memoizedCountPossible(opts *common2.MemoOptions[int]) func(string, []int) int {
 	var countPossible func(string, []int) int
 
-	countPossible = common.Memo2(
+	countPossible = common2.Memo2(
 		func(s string, c []int) int {
 			s = strings.TrimLeft(s, ".")
 
@@ -96,8 +96,8 @@ func part1() int {
 
 				springs := row[0]
 				sizes := row[1]
-				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
-				countPossible := memoizedCountPossible(&common.MemoOptions[int]{Cache: caches[i]})
+				groups := common2.Map(strings.Split(sizes, ","), common2.Atoi)
+				countPossible := memoizedCountPossible(&common2.MemoOptions[int]{Cache: caches[i]})
 
 				res := countPossible(springs, groups)
 				if res >= 0 {
@@ -148,8 +148,8 @@ func part2() int {
 
 				springs := row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0]
 				sizes := row[1] + "," + row[1] + "," + row[1] + "," + row[1] + "," + row[1]
-				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
-				countPossible := memoizedCountPossible(&common.MemoOptions[int]{Cache: caches[i]})
+				groups := common2.Map(strings.Split(sizes, ","), common2.Atoi)
+				countPossible := memoizedCountPossible(&common2.MemoOptions[int]{Cache: caches[i]})
 
 				res := countPossible(springs, groups)
 				if res >= 0 {

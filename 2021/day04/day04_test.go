@@ -2,7 +2,7 @@ package day04
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/2021/common"
+	"github.com/RickWong/go-aoc/common"
 	"strconv"
 	"strings"
 	"testing"

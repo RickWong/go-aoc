@@ -1,4 +1,6 @@
-# Go: Advent of Code 2021
+# Go: Advent of Code
+
+Fast and simple Advent of Code solutions written in Go.
 
 ## Installation
 
