@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	. "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/maps"
 	"regexp"
 	"strings"
 	"testing"
@@ -145,8 +144,8 @@ func part2() int {
 	}
 
 	// Inspected input to find conjunctions that lead to kl and rx.
-	pressesForLCM := map[string]int{"fp": -1, "mk": -1, "xt": -1, "zc": -1}
-	numModulesForLCM := len(pressesForLCM)
+	modulesInLCM := map[string]bool{"fp": true, "mk": true, "xt": true, "zc": true}
+	lcm := NewLCMCalculator[string](len(modulesInLCM))
 
 	pulses := make([]Pulse, 0, 1024*256)
 	for i := 0; i < 10000; i++ {
@@ -171,13 +170,8 @@ func part2() int {
 				mem[pulse.input] = pulse.power
 				pulse.power = !AllValues(mem, true)
 
-				if pulse.power && pressesForLCM[module.name] == -1 {
-					pressesForLCM[module.name] = i + 1
-					numModulesForLCM--
-					if numModulesForLCM == 0 {
-						lcm := LCM(maps.Values(pressesForLCM)...)
-						return lcm
-					}
+				if pulse.power && modulesInLCM[module.name] && lcm.Detect(module.name, i+1) {
+					return lcm.Calc()
 				}
 			}
 

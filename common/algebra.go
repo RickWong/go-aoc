@@ -2,6 +2,7 @@ package common
 
 import (
 	"golang.org/x/exp/constraints"
+	"golang.org/x/exp/maps"
 	"math"
 )
 
@@ -29,6 +30,30 @@ func GCD(a, b int) int {
 		a = t
 	}
 	return a
+}
+
+type LCMCalculator[K comparable] struct {
+	numKeys   int
+	keysFound map[K]struct{}
+	results   map[K]int
+}
+
+func NewLCMCalculator[K comparable](numKeys int) LCMCalculator[K] {
+	return LCMCalculator[K]{numKeys, make(map[K]struct{}, numKeys), make(map[K]int, numKeys)}
+}
+
+func (ld LCMCalculator[K]) Detect(key K, current int) bool {
+	if _, ok := ld.results[key]; ok {
+		ld.keysFound[key] = struct{}{}
+		return len(ld.keysFound) >= ld.numKeys
+	}
+
+	ld.results[key] = current
+	return false
+}
+
+func (ld LCMCalculator[K]) Calc() int {
+	return LCM(maps.Values(ld.results)...)
 }
 
 type Point2D[N Number] struct {
