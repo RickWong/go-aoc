@@ -35,6 +35,67 @@ type Rule struct {
 
 type Rating = map[byte]int
 
+type Series struct {
+	Low  int
+	High int
+}
+
+func (ser Series) Size() int {
+	return max(0, ser.High-ser.Low+1)
+}
+
+func (ser Series) Cut(n int, operator byte) (*Series, *Series) {
+	other := ser // Copy.
+	switch operator {
+	case '<':
+		if n <= ser.Low {
+			return nil, &other
+		}
+		if n > ser.High {
+			return &ser, nil
+		}
+		ser.High = n - 1
+		other.Low = n
+	case '>':
+		if n >= ser.High {
+			return nil, &other
+		}
+		if n < ser.Low {
+			return &ser, nil
+		}
+		ser.Low = n + 1
+		other.High = n
+	}
+	return &ser, &other
+}
+
+type Combination map[byte]*Series
+
+func (com Combination) Count() int {
+	prod := 1
+	for _, ser := range com {
+		if ser == nil {
+			return 0
+		}
+		prod *= ser.Size()
+	}
+	return prod
+}
+
+func (com Combination) Copy() Combination {
+	other := make(Combination, len(com))
+	maps.Copy(other, com)
+	return other
+}
+
+func (com Combination) Cut(k byte, n int, operator byte) Combination {
+	other := com.Copy()
+	if com[k] != nil {
+		com[k], other[k] = com[k].Cut(n, operator)
+	}
+	return other
+}
+
 // Helper functions.
 
 func parseRatings(blob string) []Rating {
@@ -73,6 +134,34 @@ func parseWorkflows(blob string) map[string]Workflow {
 	return workflows
 }
 
+func countAccepted(com Combination, workflow Workflow, workflows map[string]Workflow) int {
+	count := 0
+
+	if com.Count() == 0 {
+		return 0
+	}
+
+	for _, rule := range workflow.rules {
+		remaining := com.Cut(rule.attribute, rule.value, rule.comparator)
+		if rule.workflow == "A" {
+			count += com.Count()
+		} else {
+			count += countAccepted(com, workflows[rule.workflow], workflows)
+		}
+		com = remaining
+	}
+
+	if workflow.fallback != "" && com.Count() > 0 {
+		if workflow.fallback == "A" {
+			count += com.Count()
+		} else {
+			count += countAccepted(com, workflows[workflow.fallback], workflows)
+		}
+	}
+
+	return count
+}
+
 // Part 1.
 
 func part1() int {
@@ -82,29 +171,14 @@ func part1() int {
 
 	sum := 0
 	for _, rating := range ratings {
-		current := "in"
-
-		for current != "A" && current != "R" {
-			next := ""
-			for _, rule := range workflows[current].rules {
-				if rule.comparator == '<' && rating[rule.attribute] < rule.value {
-					next = rule.workflow
-					break
-				}
-				if rule.comparator == '>' && rating[rule.attribute] > rule.value {
-					next = rule.workflow
-					break
-				}
-			}
-
-			if len(next) > 0 {
-				current = next
-			} else {
-				current = workflows[current].fallback
-			}
+		root := Combination{
+			'x': &Series{rating['x'], rating['x']},
+			'm': &Series{rating['m'], rating['m']},
+			'a': &Series{rating['a'], rating['a']},
+			's': &Series{rating['s'], rating['s']},
 		}
 
-		if current == "A" {
+		if countAccepted(root, workflows["in"], workflows) > 0 {
 			sum += rating['x'] + rating['m'] + rating['a'] + rating['s']
 		}
 	}
@@ -126,82 +200,14 @@ func TestPart1(t *testing.T) {
 
 // Part 2.
 
-type Series struct {
-	Low  int
-	High int
-}
-
-func (ser Series) Size() int {
-	return max(0, ser.High-ser.Low+1)
-}
-
-func (ser Series) Cut(n int, operator byte) (Series, Series) {
-	other := ser // Copy.
-	switch operator {
-	case '<':
-		ser.High = n - 1
-		other.Low = n
-	case '>':
-		ser.Low = n + 1
-		other.High = n
-	}
-	return ser, other
-}
-
-type Combination map[byte]Series
-
-func (com Combination) Count() int {
-	prod := 1
-	for _, r := range com {
-		prod *= r.Size()
-	}
-	return prod
-}
-
-func (com Combination) Copy() Combination {
-	other := Combination{}
-	maps.Copy(other, com)
-	return other
-}
-
-func (com Combination) Cut(k byte, n int, operator byte) Combination {
-	other := com.Copy()
-	com[k], other[k] = com[k].Cut(n, operator)
-	return other
-}
-
-func countAccepted(com Combination, workflow Workflow, workflows map[string]Workflow) int {
-	count := 0
-
-	for _, rule := range workflow.rules {
-		remaining := com.Cut(rule.attribute, rule.value, rule.comparator)
-		if rule.workflow == "A" {
-			count += com.Count()
-		} else {
-			count += countAccepted(com.Copy(), workflows[rule.workflow], workflows)
-		}
-		com = remaining
-	}
-
-	if workflow.fallback != "" && com.Count() > 0 {
-		if workflow.fallback == "A" {
-			count += com.Count()
-		} else {
-			count += countAccepted(com.Copy(), workflows[workflow.fallback], workflows)
-		}
-	}
-
-	return count
-}
-
 func part2() int {
 	blocks := strings.Split(strings.TrimSpace(data), "\n\n")
 	workflows := parseWorkflows(blocks[0])
 	root := Combination{
-		'x': Series{1, 4000},
-		'm': Series{1, 4000},
-		'a': Series{1, 4000},
-		's': Series{1, 4000},
+		'x': &Series{1, 4000},
+		'm': &Series{1, 4000},
+		'a': &Series{1, 4000},
+		's': &Series{1, 4000},
 	}
 
 	return countAccepted(root, workflows["in"], workflows)
@@ -215,11 +221,46 @@ func TestPart2(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 167409079868000, result)
 	} else {
-		assert.Equal(t, 167409079868001, result)
+		assert.Equal(t, 122112157518711, result)
 	}
 }
 
 // Kaizen. Kaizen. Kaizen.
+
+func TestCut(t *testing.T) {
+	t.Skip()
+	t.Parallel()
+
+	ser := Series{1, 10}
+	yes, no := ser.Cut(5, '<')
+	assert.Equal(t, Series{1, 4}, *yes)
+	assert.Equal(t, Series{5, 10}, *no)
+
+	ser = Series{1, 10}
+	yes, no = ser.Cut(5, '>')
+	assert.Equal(t, Series{6, 10}, *yes)
+	assert.Equal(t, Series{1, 5}, *no)
+
+	ser = Series{1, 10}
+	yes, no = ser.Cut(1, '<')
+	assert.Nil(t, yes)
+	assert.Equal(t, Series{1, 10}, *no)
+
+	ser = Series{1, 10}
+	yes, no = ser.Cut(10, '>')
+	assert.Nil(t, yes)
+	assert.Equal(t, Series{1, 10}, *no)
+
+	ser = Series{1, 10}
+	yes, no = ser.Cut(0, '>')
+	assert.Equal(t, Series{1, 10}, *yes)
+	assert.Nil(t, no)
+
+	ser = Series{1, 10}
+	yes, no = ser.Cut(20, '<')
+	assert.Equal(t, Series{1, 10}, *yes)
+	assert.Nil(t, no)
+}
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
