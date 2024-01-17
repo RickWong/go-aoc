@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"github.com/zyedidia/generic/heap"
 	"slices"
 	"time"
@@ -23,21 +24,21 @@ type heapItem[T any, W Number] struct {
 
 func IterativeSearch[T any, H Hashable, W Number](
 	root *T,
-// branches are possible iterations based on the current branch.
+	// branches are possible iterations based on the current branch.
 	branchFn func(branch *T) []*T,
-// predicate terminates the search when true.
+	// predicate terminates the search when true.
 	predicateFn func(branch *T) bool,
-// identity is a map key that represents the unique iteration.
+	// identity is a map key that represents the unique iteration.
 	identityFn func(branch *T) H,
-// weight is the absolute weight of the branch.
+	// weight is the absolute weight of the branch.
 	weightFn func(branch *T, parentWeight W) W,
-// heuristic is a relative priority modifier.
+	// heuristic is a relative priority modifier.
 	heuristicFn func(branch *T) W,
-// beam width limits search space on each iteration.
+	// beam width limits search space on each iteration.
 	beamWidth int,
-// returnFirst terminates the search after the first result.
+	// returnFirst terminates the search after the first result.
 	returnFirst bool,
-// maximize true will search for the highest weight.
+	// maximize true will search for the highest weight.
 	maximize bool,
 ) *SearchResult[T, W] {
 	result := &SearchResult[T, W]{nil, 0, nil, 0, 0, 0}
@@ -126,8 +127,14 @@ func IterativeSearch[T any, H Hashable, W Number](
 	if result.Best != nil && identityFn != nil {
 		result.BestPath = append(result.BestPath, result.Best)
 		nextStep := result.Best
+		visited := make(map[H]struct{}, 32)
 		for nextStep != nil {
-			nextStep = trail[identityFn(nextStep)]
+			id := identityFn(nextStep)
+			if _, yes := visited[id]; yes {
+				panic(fmt.Sprintf("cyclic path detected: %v", nextStep))
+			}
+			visited[id] = struct{}{}
+			nextStep = trail[id]
 			result.BestPath = append(result.BestPath, nextStep)
 			if nextStep == root {
 				break
