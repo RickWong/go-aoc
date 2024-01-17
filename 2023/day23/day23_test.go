@@ -49,27 +49,34 @@ func part1() int {
 	result := common.IterativeSearch(
 		&Trail{start, 0, nil},
 		func(t *Trail) []*Trail {
-			branches := make([]*Trail, 0, 3)
+			for {
+				branches := make([]*Trail, 0, 3)
 
-			leftAllowed := (t.text == "<" || t.text == ".") && (t.last == nil || t.last.x != t.x-1)
-			upAllowed := (t.text == "^" || t.text == ".") && (t.last == nil || t.last.y != t.y-1)
-			downAllowed := (t.text == "v" || t.text == ".") && (t.last == nil || t.last.y != t.y+1)
-			rightAllowed := (t.text == ">" || t.text == ".") && (t.last == nil || t.last.x != t.x+1)
+				leftAllowed := (t.text == "<" || t.text == ".") && (t.last == nil || t.last.x != t.x-1)
+				upAllowed := (t.text == "^" || t.text == ".") && (t.last == nil || t.last.y != t.y-1)
+				downAllowed := (t.text == "v" || t.text == ".") && (t.last == nil || t.last.y != t.y+1)
+				rightAllowed := (t.text == ">" || t.text == ".") && (t.last == nil || t.last.x != t.x+1)
 
-			if upAllowed && t.y > 0 && grid[t.y-1][t.x].text != "#" {
-				branches = append(branches, &Trail{&grid[t.y-1][t.x], t.steps + 1, t})
-			}
-			if downAllowed && t.y < len(grid)-1 && grid[t.y+1][t.x].text != "#" {
-				branches = append(branches, &Trail{&grid[t.y+1][t.x], t.steps + 1, t})
-			}
-			if leftAllowed && t.x > 0 && grid[t.y][t.x-1].text != "#" {
-				branches = append(branches, &Trail{&grid[t.y][t.x-1], t.steps + 1, t})
-			}
-			if rightAllowed && t.x < len(grid[0])-1 && grid[t.y][t.x+1].text != "#" {
-				branches = append(branches, &Trail{&grid[t.y][t.x+1], t.steps + 1, t})
-			}
+				if upAllowed && t.y > 0 && grid[t.y-1][t.x].text != "#" {
+					branches = append(branches, &Trail{&grid[t.y-1][t.x], t.steps + 1, t})
+				}
+				if downAllowed && t.y < len(grid)-1 && grid[t.y+1][t.x].text != "#" {
+					branches = append(branches, &Trail{&grid[t.y+1][t.x], t.steps + 1, t})
+				}
+				if leftAllowed && t.x > 0 && grid[t.y][t.x-1].text != "#" {
+					branches = append(branches, &Trail{&grid[t.y][t.x-1], t.steps + 1, t})
+				}
+				if rightAllowed && t.x < len(grid[0])-1 && grid[t.y][t.x+1].text != "#" {
+					branches = append(branches, &Trail{&grid[t.y][t.x+1], t.steps + 1, t})
+				}
 
-			return branches
+				if len(branches) == 1 && branches[0].Point != end {
+					t = branches[0]
+					continue
+				}
+
+				return branches
+			}
 		},
 		func(t *Trail) bool {
 			return t.Point == end
@@ -77,8 +84,8 @@ func part1() int {
 		func(t *Trail) uint32 {
 			return uint32(t.y<<16 | t.x)
 		},
-		func(t *Trail, currentWeight float64) float64 {
-			return currentWeight + 1
+		func(t *Trail, currentWeight int) int {
+			return t.steps
 		},
 		nil,
 		0,
@@ -86,7 +93,7 @@ func part1() int {
 		true,
 	)
 
-	return result.Best.steps
+	return result.BestWeight
 }
 
 func TestPart1(t *testing.T) {
