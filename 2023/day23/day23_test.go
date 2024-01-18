@@ -3,7 +3,7 @@ package day23
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/common"
-	"github.com/bits-and-blooms/bitset"
+	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -33,7 +33,7 @@ type Trail struct {
 type Trail2 struct {
 	*Point
 	steps   int
-	visited bitset.BitSet
+	visited bitmap.Bitmap
 }
 
 // Helper functions.
@@ -130,20 +130,22 @@ func part2() int {
 
 	start := &grid[0][strings.Index(lines[0], ".")]
 	end := &grid[len(grid)-1][strings.Index(lines[len(lines)-1], ".")]
+	visited := make(bitmap.Bitmap, 8)
+	visited.Set(uint32(start.y<<8 | start.x))
 
 	result := common.IterativeSearch[Trail2, int, int](
-		&Trail2{start, 0, common.Deref(bitset.New(uint(len(grid))))},
+		&Trail2{start, 0, visited},
 		func(t *Trail2) []*Trail2 {
 			branches := make([]*Trail2, 0, 3)
-			t.visited = common.Deref(t.visited.Clone())
+			t.visited = t.visited.Clone(nil)
 
 			for {
-				t.visited.Set(uint(t.y<<8 | t.x))
+				t.visited.Set(uint32(t.y<<8 | t.x))
 
-				upAllowed := t.y-1 >= 0 && !t.visited.Test(uint((t.y-1)<<8|t.x)) && grid[t.y-1][t.x].text != "#"
-				downAllowed := t.y+1 < len(grid) && !t.visited.Test(uint((t.y+1)<<8|t.x)) && grid[t.y+1][t.x].text != "#"
-				leftAllowed := t.x-1 >= 0 && !t.visited.Test(uint(t.y<<8|t.x-1)) && grid[t.y][t.x-1].text != "#"
-				rightAllowed := t.x+1 < len(grid[0]) && !t.visited.Test(uint(t.y<<8|t.x+1)) && grid[t.y][t.x+1].text != "#"
+				upAllowed := t.y-1 >= 0 && !t.visited.Contains(uint32((t.y-1)<<8|t.x)) && grid[t.y-1][t.x].text != "#"
+				downAllowed := t.y+1 < len(grid) && !t.visited.Contains(uint32((t.y+1)<<8|t.x)) && grid[t.y+1][t.x].text != "#"
+				leftAllowed := t.x-1 >= 0 && !t.visited.Contains(uint32(t.y<<8|t.x-1)) && grid[t.y][t.x-1].text != "#"
+				rightAllowed := t.x+1 < len(grid[0]) && !t.visited.Contains(uint32(t.y<<8|t.x+1)) && grid[t.y][t.x+1].text != "#"
 
 				if upAllowed {
 					branches = append(branches, &Trail2{&grid[t.y-1][t.x], t.steps + 1, t.visited})
