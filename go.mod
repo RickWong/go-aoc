@@ -3,6 +3,7 @@ module github.com/RickWong/go-aoc
 go 1.21.4
 
 require (
+	github.com/bits-and-blooms/bitset v1.13.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/deckarep/golang-set/v2 v2.3.1 // indirect
 	github.com/fatih/color v1.16.0 // indirect

@@ -31,6 +31,7 @@ type LUT map[int]struct{}
 
 func traceBeam(grid [][]byte, beam Beam) LUT {
 	beams := make([]Beam, 0, 1024)
+	// TODO: Use bitset
 	history := make(map[Beam]bool, 1024)
 	height := len(grid)
 	width := len(grid[0])

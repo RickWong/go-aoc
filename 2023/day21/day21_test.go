@@ -46,6 +46,7 @@ func part1() int {
 	}
 
 	// Connect neighbors.
+	// TODO: Use bitset
 	visited := make(map[int]bool, len(grid)*len(grid[0]))
 	queue := make([]*Tile, 0, 64)
 	queue = append(queue, start)

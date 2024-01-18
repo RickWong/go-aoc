@@ -123,6 +123,7 @@ func part1() int {
 func calculateDistances(start *Point, size int) int {
 	unvisited := make([]*Point, 0, size)
 	unvisited = append(unvisited, start)
+	// TODO: Use bitset
 	visited := make(map[uint32]bool, size)
 	maxDistance := 0
 

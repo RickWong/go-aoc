@@ -28,6 +28,7 @@ type Point struct {
 func parseGridAndGalaxies(lines []string, repeatSpace int) ([][]Point, []*Point) {
 	grid := make([][]Point, len(lines))
 	galaxies := make([]*Point, 0, 100)
+	// TODO: Use bitset
 	rowsWithGalaxy := make(map[int]bool)
 	colsWithGalaxy := make(map[int]bool)
 
