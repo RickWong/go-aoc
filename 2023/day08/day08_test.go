@@ -77,25 +77,23 @@ func part2() int {
 		}
 	}
 
-	lcm := common.NewLCMCalculator[int](len(positions))
-	for idx, position := range positions {
-		steps := 0
+	steps := make([]int, len(positions))
+	for i, position := range positions {
 		for {
 			L, R := nodes[position][0], nodes[position][1]
-			if path[steps%len(path)] == "L" {
+			if path[steps[i]%len(path)] == "L" {
 				position = L
 			} else {
 				position = R
 			}
-			steps++
+			steps[i]++
 			if strings.HasSuffix(position, "Z") {
 				break
 			}
 		}
-		lcm.Detect(idx, steps)
 	}
 
-	return lcm.Calc()
+	return common.LCM(steps...)
 }
 
 func TestPart2(t *testing.T) {
