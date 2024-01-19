@@ -18,12 +18,12 @@ func TestMemo(t *testing.T) {
 	assert.Equal(t, 3.0, f2(1, 2))
 	assert.Equal(t, 3.0, f2(1, 2))
 	assert.Equal(t, 4.0, f2(1, 3))
-	assert.Equal(t, t, f3("a", 1, t))
-	assert.Equal(t, t, f3("a", 1, t))
+	assert.Equal(t, t, f3("a", 1, t)) // t dereferenced and encoded as {}
+	assert.Equal(t, t, f3("a", 1, t)) // t dereferenced and encoded as {}
 	assert.Equal(t, nil, f3("a", 2, nil))
-	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo")))
-	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo")))
-	assert.Equal(t, false, f4("a", 1, 2, Ptr("")))
+	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo"))) // Ptr("hallo") dereferenced and encoded as "hallo"
+	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo"))) // Ptr("hallo") dereferenced and encoded as "hallo"
+	assert.Equal(t, false, f4("a", 1, 2, Ptr("")))     // Ptr("") dereferenced and encoded as ""
 }
 
 func TestFibionacci(t *testing.T) {

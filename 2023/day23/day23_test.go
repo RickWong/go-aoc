@@ -33,7 +33,7 @@ type Trail struct {
 	last  *Trail
 }
 
-type Trail2 struct {
+type GraphTrail struct {
 	*GraphPoint
 	steps   int
 	visited uint64
@@ -46,6 +46,84 @@ type GraphPoint struct {
 }
 
 // Helper functions.
+
+func parseGraph(lines []string) [][]*GraphPoint {
+	graph := make([][]*GraphPoint, len(lines))
+	for y, line := range lines {
+		graph[y] = make([]*GraphPoint, len(line))
+		for x, text := range strings.Split(line, "") {
+			if text[0] != '#' {
+				graph[y][x] = &GraphPoint{0, x, y, make(map[*GraphPoint]int, 4)}
+			}
+		}
+	}
+	// Build graph edges.
+	for y, row := range graph {
+		for x, point := range row {
+			if graph[y][x] == nil {
+				continue
+			}
+
+			if y > 0 && graph[y-1][x] != nil {
+				point.Edges[graph[y-1][x]] = 1
+			}
+			if y < len(graph)-1 && graph[y+1][x] != nil {
+				point.Edges[graph[y+1][x]] = 1
+			}
+			if x > 0 && graph[y][x-1] != nil {
+				point.Edges[graph[y][x-1]] = 1
+			}
+			if x < len(graph[0])-1 && graph[y][x+1] != nil {
+				point.Edges[graph[y][x+1]] = 1
+			}
+		}
+	}
+	// Compact graph.
+	for y, row := range graph {
+		for x, point := range row {
+			if point == nil {
+				continue
+			}
+
+			if len(point.Edges) == 2 {
+				// Connect neighbors to each other.
+				neighbors := maps.Keys(point.Edges)
+				distance := point.Edges[neighbors[0]] + point.Edges[neighbors[1]]
+				neighbors[0].Edges[neighbors[1]] = distance
+				neighbors[1].Edges[neighbors[0]] = distance
+
+				// Remove point.
+				delete(neighbors[0].Edges, point)
+				delete(neighbors[1].Edges, point)
+				point = nil
+				graph[y][x] = nil
+			}
+		}
+	}
+	return graph
+}
+
+func assignGraphIDs(start *GraphPoint) {
+	nextId := 1
+	queue := []*GraphPoint{start}
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		if current.Id != 0 {
+			continue
+		}
+
+		current.Id = nextId
+		nextId++
+
+		for edge := range current.Edges {
+			if edge.Id == 0 {
+				queue = append(queue, edge)
+			}
+		}
+	}
+}
 
 // Part 1.
 
@@ -130,132 +208,57 @@ func TestPart1(t *testing.T) {
 func part2() int {
 	// Parse graph nodes.
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := make([][]Point, len(lines))
-	graph := make([][]*GraphPoint, len(lines))
-	for y, line := range lines {
-		grid[y] = make([]Point, len(line))
-		graph[y] = make([]*GraphPoint, len(line))
-		for x, text := range strings.Split(line, "") {
-			grid[y][x] = Point{x, y, text}
-
-			if text[0] != '#' {
-				graph[y][x] = &GraphPoint{0, x, y, make(map[*GraphPoint]int, 4)}
-			}
-		}
-	}
-
-	// Build graph edges.
-	for y, row := range graph {
-		for x, point := range row {
-			if graph[y][x] == nil {
-				continue
-			}
-
-			if y > 0 && graph[y-1][x] != nil {
-				point.Edges[graph[y-1][x]] = 1
-			}
-			if y < len(graph)-1 && graph[y+1][x] != nil {
-				point.Edges[graph[y+1][x]] = 1
-			}
-			if x > 0 && graph[y][x-1] != nil {
-				point.Edges[graph[y][x-1]] = 1
-			}
-			if x < len(graph[0])-1 && graph[y][x+1] != nil {
-				point.Edges[graph[y][x+1]] = 1
-			}
-		}
-	}
-
-	// Compact graph.
-	for y, row := range graph {
-		for x, point := range row {
-			if point == nil {
-				continue
-			}
-
-			if len(point.Edges) == 2 {
-				// Connect neighbors to each other.
-				neighbors := maps.Keys(point.Edges)
-				distance := point.Edges[neighbors[0]] + point.Edges[neighbors[1]]
-				neighbors[0].Edges[neighbors[1]] = distance
-				neighbors[1].Edges[neighbors[0]] = distance
-
-				// Remove point.
-				delete(neighbors[0].Edges, point)
-				delete(neighbors[1].Edges, point)
-				point = nil
-				graph[y][x] = nil
-			}
-		}
-	}
+	graph := parseGraph(lines)
 
 	// Prepare for DFS.
 	start := graph[0][strings.Index(lines[0], ".")]
-	end := graph[len(grid)-1][strings.Index(lines[len(lines)-1], ".")]
+	end := graph[len(lines)-1][strings.Index(lines[len(lines)-1], ".")]
 
 	// Re-assign IDs with BFS.
-	nextId := 1
-	queue := []*GraphPoint{start}
-	for len(queue) > 0 {
-		current := queue[0]
-		queue = queue[1:]
-
-		if current.Id != 0 {
-			continue
-		}
-
-		current.Id = nextId
-		nextId++
-
-		for edge := range current.Edges {
-			if edge.Id == 0 {
-				queue = append(queue, edge)
-			}
-		}
-	}
+	assignGraphIDs(start)
 
 	// Move starting point to a node with multiple edges, for parallelism.
 	offset := 0
+	visited := uint64(1 << start.Id)
 	for len(start.Edges) == 1 {
 		next := maps.Keys(start.Edges)[0]
 		offset += start.Edges[next]
 		start = next
+		visited |= 1 << start.Id
 	}
 
-	results := make(map[*GraphPoint]int, len(start.Edges))
+	starts := maps.Keys(start.Edges)
+	results := make([]int, len(starts))
 	eg := errgroup.Group{}
 	eg.SetLimit(runtime.NumCPU())
 
-	for edge, distance := range start.Edges {
-		edge := edge
-		distance := offset + distance
+	for i := 0; i < len(starts); i++ {
+		i := i
+		edge := starts[i]
+		distance := offset + start.Edges[edge]
 
 		eg.Go(func() error {
-			println("Starting goroutine")
-
-			visitedBits := uint64(1 << start.Id) // Can't go back to start.
-
-			result := common.IterativeSearch[Trail2, uint64, int](
-				&Trail2{edge, distance, visitedBits},
-				func(t *Trail2) []*Trail2 {
-					branches := make([]*Trail2, 0, 3)
-					t.visited = t.visited + 0 // Copy.
+			result := common.IterativeSearch[GraphTrail, uint64, int](
+				&GraphTrail{edge, distance, visited},
+				func(t *GraphTrail) []*GraphTrail {
+					branches := make([]*GraphTrail, 0, 3)
+					nextVisited := t.visited + 0 // Copy.
 
 					for {
-						t.visited |= 1 << t.Id
+						nextVisited |= 1 << t.Id
 
 						for edge, steps := range t.Edges {
 							// Always take the last step, otherwise it cannot be taken later.
 							if edge.Id == end.Id {
-								return []*Trail2{{edge, t.steps + steps, t.visited}}
+								return []*GraphTrail{{edge, t.steps + steps, nextVisited}}
 							}
 
 							if t.visited&(1<<edge.Id) == 0 {
-								branches = append(branches, &Trail2{edge, t.steps + steps, t.visited})
+								branches = append(branches, &GraphTrail{edge, t.steps + steps, nextVisited})
 							}
 						}
 
-						if len(branches) == 1 && branches[0].Id != end.Id {
+						if len(branches) == 1 {
 							t = branches[0]
 							branches = branches[:0]
 							continue
@@ -264,13 +267,12 @@ func part2() int {
 						return branches
 					}
 				},
-				func(t *Trail2) bool {
+				func(t *GraphTrail) bool {
 					return t.Id == end.Id
 				},
 				// Don't use identity func to prune, the longest path could start off with a short path.
-				// Only use it if it also includes the edges left?
 				nil,
-				func(t *Trail2, cw int) int {
+				func(t *GraphTrail, cw int) int {
 					return t.steps
 				},
 				nil,
@@ -279,14 +281,14 @@ func part2() int {
 				true,
 			)
 
-			results[edge] = result.BestWeight
+			results[i] = result.BestWeight
 			println("result", result.BestWeight)
 			return nil
 		})
 	}
 
 	_ = eg.Wait()
-	return slices.Max(maps.Values(results))
+	return slices.Max(results)
 }
 
 func TestPart2(t *testing.T) {
