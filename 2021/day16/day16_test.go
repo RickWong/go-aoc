@@ -17,7 +17,7 @@ var Example string
 //go:embed input.txt
 var Input string
 
-var data = Example
+var data = Input
 
 type Packet struct {
 	version, typeId int

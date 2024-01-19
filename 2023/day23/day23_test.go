@@ -125,6 +125,17 @@ func assignGraphIDs(start *GraphPoint) {
 	}
 }
 
+func findEdgesLeft(point *GraphPoint, visited uint64) uint64 {
+	left := uint64(0)
+	for edge := range point.Edges {
+		if visited&(1<<edge.Id) == 0 {
+			left |= 1 << edge.Id
+			left |= findEdgesLeft(edge, left|visited)
+		}
+	}
+	return left
+}
+
 // Part 1.
 
 func part1() int {
@@ -280,8 +291,11 @@ func part2() int {
 				func(t *GraphTrail) bool {
 					return t.Id == end.Id
 				},
-				// Don't use identity func to prune, the longest path could start off with a short path.
-				nil,
+				// Normally can't prune since the longest path could start off with a short path.
+				// But here we account for edges left, so only branches with shared remaining paths are pruned.
+				func(t *GraphTrail) uint64 {
+					return uint64(t.Id<<54) | findEdgesLeft(t.GraphPoint, t.visited)
+				},
 				func(t *GraphTrail, cw int) int {
 					return t.steps
 				},

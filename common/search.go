@@ -28,8 +28,8 @@ func IterativeSearch[T any, H Hashable, W Number](
 	branchFn func(branch *T) []*T,
 	// predicate terminates the search when true.
 	predicateFn func(branch *T) bool,
-	// identity is a map key that represents the unique iteration.
-	identityFn func(branch *T) H,
+	// hash is a key that identifies the unique state of this branch.
+	hashFn func(branch *T) H,
 	// weight is the absolute weight of the branch.
 	weightFn func(branch *T, parentWeight W) W,
 	// heuristic is a relative priority modifier.
@@ -84,17 +84,17 @@ func IterativeSearch[T any, H Hashable, W Number](
 				weight = weightFn(branch, current.weight)
 			}
 
-			if identityFn != nil {
-				id := identityFn(branch)
-				knownWeight, known := weights[id]
+			if hashFn != nil {
+				hash := hashFn(branch)
+				knownWeight, known := weights[hash]
 				if known &&
 					((maximize && knownWeight >= weight) ||
 						(!maximize && knownWeight <= weight)) {
 					continue
 				}
 
-				weights[id] = weight
-				trail[id] = current.branch
+				weights[hash] = weight
+				trail[hash] = current.branch
 			}
 
 			priority := weight
@@ -124,17 +124,17 @@ func IterativeSearch[T any, H Hashable, W Number](
 		}
 	}
 
-	if result.Best != nil && identityFn != nil {
+	if result.Best != nil && hashFn != nil {
 		result.BestPath = append(result.BestPath, result.Best)
 		nextStep := result.Best
 		visited := make(map[H]struct{}, 32)
 		for nextStep != nil {
-			id := identityFn(nextStep)
-			if _, yes := visited[id]; yes {
+			hash := hashFn(nextStep)
+			if _, yes := visited[hash]; yes {
 				panic(fmt.Sprintf("cyclic path detected: %v", nextStep))
 			}
-			visited[id] = struct{}{}
-			nextStep = trail[id]
+			visited[hash] = struct{}{}
+			nextStep = trail[hash]
 			result.BestPath = append(result.BestPath, nextStep)
 			if nextStep == root {
 				break
