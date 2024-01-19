@@ -218,13 +218,20 @@ func part2() int {
 	assignGraphIDs(start)
 
 	// Move starting point to a node with multiple edges, for parallelism.
-	offset := 0
+	startOffset := 0
 	visited := uint64(1 << start.Id)
 	for len(start.Edges) == 1 {
 		next := maps.Keys(start.Edges)[0]
-		offset += start.Edges[next]
+		startOffset += start.Edges[next]
 		start = next
 		visited |= 1 << start.Id
+	}
+	// Move end point to a node with multiple edges, to finish early.
+	endOffset := 0
+	for len(end.Edges) == 1 {
+		prev := maps.Keys(end.Edges)[0]
+		endOffset += end.Edges[prev]
+		end = prev
 	}
 
 	starts := maps.Keys(start.Edges)
@@ -235,7 +242,7 @@ func part2() int {
 	for i := 0; i < len(starts); i++ {
 		i := i
 		edge := starts[i]
-		distance := offset + start.Edges[edge]
+		distance := start.Edges[edge]
 
 		eg.Go(func() error {
 			result := common.IterativeSearch[GraphTrail, uint64, int](
@@ -248,17 +255,12 @@ func part2() int {
 						nextVisited |= 1 << t.Id
 
 						for edge, steps := range t.Edges {
-							// Always take the last step, otherwise it cannot be taken later.
-							if edge.Id == end.Id {
-								return []*GraphTrail{{edge, t.steps + steps, nextVisited}}
-							}
-
 							if t.visited&(1<<edge.Id) == 0 {
 								branches = append(branches, &GraphTrail{edge, t.steps + steps, nextVisited})
 							}
 						}
 
-						if len(branches) == 1 {
+						if len(branches) == 1 && branches[0].Id != end.Id {
 							t = branches[0]
 							branches = branches[:0]
 							continue
@@ -288,7 +290,7 @@ func part2() int {
 	}
 
 	_ = eg.Wait()
-	return slices.Max(results)
+	return startOffset + slices.Max(results) + endOffset
 }
 
 func TestPart2(t *testing.T) {
