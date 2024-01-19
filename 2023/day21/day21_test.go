@@ -19,10 +19,9 @@ var data = Input
 // Data types.
 
 type Tile struct {
-	id        uint32
-	y, x      int
-	hash      bool
-	neighbors []*Tile
+	id   uint32
+	y, x int
+	Wall bool
 }
 
 // Helper functions.
@@ -39,7 +38,7 @@ func part1() int {
 	for y, line := range lines {
 		grid[y] = make([]*Tile, len(line))
 		for x, char := range line {
-			grid[y][x] = &Tile{nextId, y, x, char == '#', make([]*Tile, 0, 4)}
+			grid[y][x] = &Tile{nextId, y, x, char == '#'}
 			nextId++
 			if char == 'S' {
 				start = grid[y][x]
@@ -47,45 +46,38 @@ func part1() int {
 		}
 	}
 
-	// Connect neighbors.
-	visited := make(bitmap.Bitmap, 0, nextId/64+1)
-	queue := make([]*Tile, 0, 64)
-	queue = append(queue, start)
-	for len(queue) > 0 {
-		cur := queue[0]
-		queue = queue[1:]
-
-		if visited.Contains(cur.id) {
-			continue
-		}
-
-		visited.Set(cur.id)
-
-		if cur.y > 0 && !grid[cur.y-1][cur.x].hash {
-			cur.neighbors = append(cur.neighbors, grid[cur.y-1][cur.x])
-		}
-
-		if cur.y < len(grid)-1 && !grid[cur.y+1][cur.x].hash {
-			cur.neighbors = append(cur.neighbors, grid[cur.y+1][cur.x])
-		}
-
-		if cur.x > 0 && !grid[cur.y][cur.x-1].hash {
-			cur.neighbors = append(cur.neighbors, grid[cur.y][cur.x-1])
-		}
-
-		if cur.x < len(grid[cur.y])-1 && !grid[cur.y][cur.x+1].hash {
-			cur.neighbors = append(cur.neighbors, grid[cur.y][cur.x+1])
-		}
-
-		for _, neighbor := range cur.neighbors {
-			if !visited.Contains(neighbor.id) {
-				queue = append(queue, neighbor)
+	findNeighbors := func(y, x int, visited bitmap.Bitmap) []*Tile {
+		neighbors := make([]*Tile, 0, 4)
+		if y > 0 {
+			n := grid[y-1][x]
+			if !n.Wall && !visited.Contains(n.id) {
+				neighbors = append(neighbors, n)
 			}
 		}
+		if y < len(grid)-1 {
+			n := grid[y+1][x]
+			if !n.Wall && !visited.Contains(n.id) {
+				neighbors = append(neighbors, n)
+			}
+		}
+		if x > 0 {
+			n := grid[y][x-1]
+			if !n.Wall && !visited.Contains(n.id) {
+				neighbors = append(neighbors, n)
+			}
+		}
+		if x < len(grid[0])-1 {
+			n := grid[y][x+1]
+			if !n.Wall && !visited.Contains(n.id) {
+				neighbors = append(neighbors, n)
+			}
+		}
+		return neighbors
 	}
 
 	// Find visited tiles per even number of steps.
-	visited.Clear()
+	visited := make(bitmap.Bitmap, 0, nextId/64+1)
+	queue := make([]*Tile, 0, 64)
 	queue = append(queue, start)
 	nextQueue := make([]*Tile, 0, 64) // For each step, tracks the new tiles found.
 
@@ -98,16 +90,11 @@ func part1() int {
 				continue
 			}
 
-			for _, neighbor := range cur.neighbors {
-				if !visited.Contains(neighbor.id) {
-					nextQueue = append(nextQueue, neighbor)
-				}
-			}
-
 			if steps%2 == 0 {
 				visited.Set(cur.id)
 			}
 
+			nextQueue = append(nextQueue, findNeighbors(cur.y, cur.x, visited)...)
 		}
 
 		queue, nextQueue = nextQueue, queue
@@ -141,7 +128,7 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 82000210, result)
+		assert.Equal(t, 16733044, result)
 	} else {
 		assert.Equal(t, 357134560737, result)
 	}
@@ -152,6 +139,6 @@ func TestPart2(t *testing.T) {
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		part1()
-		part2()
+		//part2()
 	}
 }
