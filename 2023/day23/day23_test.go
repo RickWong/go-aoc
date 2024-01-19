@@ -3,7 +3,6 @@ package day23
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/common"
-	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
@@ -37,21 +36,17 @@ type Trail struct {
 type Trail2 struct {
 	*GraphPoint
 	steps   int
-	visited bitmap.Bitmap
+	visited uint64
 }
 
 type GraphPoint struct {
-	Id    uint32
+	Bit   uint64
 	X, Y  int
 	Text  byte
 	Edges map[*GraphPoint]int // V = distance
 }
 
 // Helper functions.
-
-func id(y, x int) uint32 {
-	return uint32(y<<16 | x)
-}
 
 // Part 1.
 
@@ -145,7 +140,7 @@ func part2() int {
 			grid[y][x] = Point{x, y, text}
 
 			if text[0] != '#' {
-				graph[y][x] = &GraphPoint{id(y, x), x, y, text[0], make(map[*GraphPoint]int, 4)}
+				graph[y][x] = &GraphPoint{0, x, y, text[0], make(map[*GraphPoint]int, 4)}
 			}
 		}
 	}
@@ -195,9 +190,30 @@ func part2() int {
 		}
 	}
 
-	// Prepare DFS.
+	// Prepare for DFS.
 	start := graph[0][strings.Index(lines[0], ".")]
 	end := graph[len(grid)-1][strings.Index(lines[len(lines)-1], ".")]
+
+	// Re-assign IDs with BFS.
+	bit := uint64(0b1)
+	queue := []*GraphPoint{start}
+	for len(queue) > 0 {
+		current := queue[0]
+		queue = queue[1:]
+
+		if current.Bit != 0 {
+			continue
+		}
+
+		current.Bit = bit
+		bit <<= 1
+
+		for edge := range current.Edges {
+			if edge.Bit == 0 {
+				queue = append(queue, edge)
+			}
+		}
+	}
 
 	// Move starting point to a node with multiple edges, for parallelism.
 	offset := 0
@@ -213,35 +229,34 @@ func part2() int {
 
 	for edge, distance := range start.Edges {
 		edge := edge
-		distance := distance
+		distance := offset + distance
 
 		eg.Go(func() error {
 			println("Starting goroutine")
 
-			visited := make(bitmap.Bitmap, 8)
-			visited.Set(start.Id) // Can't go back to start.
+			visitedBits := start.Bit // Can't go back to start.
 
 			result := common.IterativeSearch[Trail2, int, int](
-				&Trail2{edge, distance, visited},
+				&Trail2{edge, distance, visitedBits},
 				func(t *Trail2) []*Trail2 {
 					branches := make([]*Trail2, 0, 3)
-					t.visited = t.visited.Clone(nil)
+					t.visited = t.visited + 0 // Copy.
 
 					for {
-						t.visited.Set(t.Id)
+						t.visited |= t.Bit
 
 						for edge, steps := range t.Edges {
 							// Always take the last step, otherwise it cannot be taken later.
-							if edge.Id == end.Id {
+							if edge.Bit == end.Bit {
 								return []*Trail2{{edge, t.steps + steps, t.visited}}
 							}
 
-							if !t.visited.Contains(edge.Id) {
+							if t.visited&edge.Bit == 0 {
 								branches = append(branches, &Trail2{edge, t.steps + steps, t.visited})
 							}
 						}
 
-						if len(branches) == 1 && branches[0].Id != end.Id {
+						if len(branches) == 1 && branches[0].Bit != end.Bit {
 							t = branches[0]
 							branches = branches[:0]
 							continue
@@ -251,7 +266,7 @@ func part2() int {
 					}
 				},
 				func(t *Trail2) bool {
-					return t.Id == end.Id
+					return t.Bit == end.Bit
 				},
 				// Don't use identity func to prune, the longest path could start off with a short path.
 				// Only use it if it also includes the edges left?
