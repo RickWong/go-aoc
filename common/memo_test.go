@@ -1,7 +1,6 @@
 package common
 
 import (
-	"errors"
 	"github.com/stretchr/testify/assert"
 	"strconv"
 	"testing"
@@ -11,7 +10,7 @@ func TestMemo(t *testing.T) {
 	f1 := Memo(func(a int) int { return a }, nil)
 	f2 := Memo2(func(a float32, b float64) float64 { return float64(a) + b }, nil)
 	f3 := Memo3(func(a string, b int, c any) any { return c }, nil)
-	f4 := Memo4(func(a string, b int, c float32, d error) bool { return d.Error() != "" }, nil)
+	f4 := Memo4(func(a string, b int, c float32, d *string) bool { return *d != "" }, nil)
 
 	assert.Equal(t, 1, f1(1))
 	assert.Equal(t, 1, f1(1))
@@ -22,9 +21,9 @@ func TestMemo(t *testing.T) {
 	assert.Equal(t, t, f3("a", 1, t))
 	assert.Equal(t, t, f3("a", 1, t))
 	assert.Equal(t, nil, f3("a", 2, nil))
-	assert.Equal(t, true, f4("a", 1, 2, errors.New("hallo")))
-	assert.Equal(t, true, f4("a", 1, 2, errors.New("hallo")))
-	assert.Equal(t, false, f4("a", 1, 2, errors.New("")))
+	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo")))
+	assert.Equal(t, true, f4("a", 1, 2, Ptr("hallo")))
+	assert.Equal(t, false, f4("a", 1, 2, Ptr("")))
 }
 
 func TestFibionacci(t *testing.T) {
@@ -61,4 +60,18 @@ func TestFibionacci(t *testing.T) {
 	assert.Equal(t, 832040, fibionacci(30))
 	assert.Equal(t, 25, calls)
 	calls = 0
+}
+
+func BenchmarkFibionacci(b *testing.B) {
+	var fibionacci func(n int) int
+	fibionacci = Memo(func(n int) int {
+		if n < 2 {
+			return n
+		}
+		return fibionacci(n-1) + fibionacci(n-2)
+	}, nil)
+
+	for n := 0; n < b.N; n++ {
+		fibionacci(30)
+	}
 }

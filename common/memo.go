@@ -11,6 +11,14 @@ type MemoOptions[Out any] struct {
 	Hash  func(data any) string
 }
 
+// FasterHash takes any object and returns a hash string as fast as possible.
+func FasterHash[T any](data T) string {
+	bytes, _ := jsoniter.ConfigDefault.Marshal(&data)
+	hash := fnv.New32a()
+	_, _ = hash.Write(bytes)
+	return strconv.Itoa(int(hash.Sum32()))
+}
+
 // Memo is a generic memoization function that accepts 1 argument.
 func Memo[A, Out any](f func(a A) Out, opts *MemoOptions[Out]) func(a A) Out {
 	if opts == nil {
@@ -24,10 +32,7 @@ func Memo[A, Out any](f func(a A) Out, opts *MemoOptions[Out]) func(a A) Out {
 		if opts.Hash != nil {
 			key = opts.Hash(a)
 		} else {
-			bytes, _ := jsoniter.ConfigCompatibleWithStandardLibrary.Marshal(&a)
-			hash := fnv.New32a()
-			_, _ = hash.Write(bytes)
-			key = strconv.Itoa(int(hash.Sum32()))
+			key = FasterHash(a)
 		}
 		if v, ok := opts.Cache[key]; ok {
 			return v
