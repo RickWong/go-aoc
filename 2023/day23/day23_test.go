@@ -268,7 +268,7 @@ func part2() int {
 						for edge, steps := range t.Edges {
 							if t.visited&(1<<edge.Id) == 0 {
 								// Source: https://www.reddit.com/r/adventofcode/comments/18oy4pc/2023_day_23_solutions/kfyvp2g/
-								// Skip perimiter edges that are "behind", as they lead to a "snake collision" dead-end.
+								// Skip perimiter edge paths that "turn backwards" as they inevitably lead to a snake-ish dead end.
 								perimeter := len(t.Edges) <= 3 && len(edge.Edges) <= 3
 								behind := edge.Id+1 < t.Id
 								if perimeter && behind {
@@ -291,8 +291,8 @@ func part2() int {
 				func(t *GraphTrail) bool {
 					return t.Id == end.Id
 				},
-				// Normally can't prune since the longest path could start off with a short path.
-				// But here we account for edges left, so only branches with shared remaining paths are pruned.
+				// Normally can't prune based on position, since the longest path could start off with a short path.
+				// But here we account for edges left, so only branches on a position with shared remaining paths are pruned.
 				func(t *GraphTrail) uint64 {
 					return uint64(t.Id<<54) | findEdgesLeft(t.GraphPoint, t.visited)
 				},

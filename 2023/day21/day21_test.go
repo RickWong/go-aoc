@@ -2,8 +2,8 @@ package day21
 
 import (
 	_ "embed"
+	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/maps"
 	"strings"
 	"testing"
 )
@@ -19,7 +19,7 @@ var data = Input
 // Data types.
 
 type Tile struct {
-	id        int
+	id        uint32
 	y, x      int
 	hash      bool
 	neighbors []*Tile
@@ -35,10 +35,12 @@ func part1() int {
 
 	// Read grid.
 	var start *Tile
+	nextId := uint32(1)
 	for y, line := range lines {
 		grid[y] = make([]*Tile, len(line))
 		for x, char := range line {
-			grid[y][x] = &Tile{y<<16 | x, y, x, char == '#', nil}
+			grid[y][x] = &Tile{nextId, y, x, char == '#', make([]*Tile, 0, 4)}
+			nextId++
 			if char == 'S' {
 				start = grid[y][x]
 			}
@@ -46,19 +48,18 @@ func part1() int {
 	}
 
 	// Connect neighbors.
-	// TODO: Use bitset
-	visited := make(map[int]bool, len(grid)*len(grid[0]))
+	visited := make(bitmap.Bitmap, 0, nextId/64+1)
 	queue := make([]*Tile, 0, 64)
 	queue = append(queue, start)
 	for len(queue) > 0 {
 		cur := queue[0]
 		queue = queue[1:]
 
-		if visited[cur.id] {
+		if visited.Contains(cur.id) {
 			continue
 		}
 
-		visited[cur.id] = true
+		visited.Set(cur.id)
 
 		if cur.y > 0 && !grid[cur.y-1][cur.x].hash {
 			cur.neighbors = append(cur.neighbors, grid[cur.y-1][cur.x])
@@ -77,53 +78,43 @@ func part1() int {
 		}
 
 		for _, neighbor := range cur.neighbors {
-			if !visited[neighbor.id] {
+			if !visited.Contains(neighbor.id) {
 				queue = append(queue, neighbor)
 			}
 		}
 	}
 
-	// Find visisted tiles per even number of steps.
-	maps.Clear(visited)
+	// Find visited tiles per even number of steps.
+	visited.Clear()
 	queue = append(queue, start)
-	nextQueue := make([]*Tile, 0, 64)
+	nextQueue := make([]*Tile, 0, 64) // For each step, tracks the new tiles found.
 
 	for steps := 0; steps <= 64; steps++ {
 		for len(queue) > 0 {
 			cur := queue[0]
 			queue = queue[1:]
 
-			if !visited[cur.id] {
-				nextQueue = append(nextQueue, cur.neighbors...)
+			if visited.Contains(cur.id) {
+				continue
+			}
+
+			for _, neighbor := range cur.neighbors {
+				if !visited.Contains(neighbor.id) {
+					nextQueue = append(nextQueue, neighbor)
+				}
 			}
 
 			if steps%2 == 0 {
-				visited[cur.id] = true
+				visited.Set(cur.id)
 			}
+
 		}
 
 		queue, nextQueue = nextQueue, queue
 	}
 
-	//Print(grid, visited)
-
-	sum := len(visited)
+	sum := visited.Count()
 	return sum
-}
-
-func Print(grid [][]*Tile, visited map[int]bool) {
-	for _, row := range grid {
-		for _, tile := range row {
-			if tile.hash {
-				print("#")
-			} else if visited[tile.id] {
-				print("O")
-			} else {
-				print(".")
-			}
-		}
-		println()
-	}
 }
 
 func TestPart1(t *testing.T) {
