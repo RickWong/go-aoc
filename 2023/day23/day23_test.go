@@ -256,6 +256,14 @@ func part2() int {
 
 						for edge, steps := range t.Edges {
 							if t.visited&(1<<edge.Id) == 0 {
+								// Source: https://www.reddit.com/r/adventofcode/comments/18oy4pc/2023_day_23_solutions/kfyvp2g/
+								// Skip perimiter edges that are "behind", as they lead to a "snake collision" dead-end.
+								perimeter := len(t.Edges) <= 3 && len(edge.Edges) <= 3
+								behind := edge.Id+1 < t.Id
+								if perimeter && behind {
+									continue
+								}
+
 								branches = append(branches, &GraphTrail{edge, t.steps + steps, nextVisited})
 							}
 						}
