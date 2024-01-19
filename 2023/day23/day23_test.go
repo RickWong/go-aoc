@@ -42,7 +42,6 @@ type Trail2 struct {
 type GraphPoint struct {
 	Id    int
 	X, Y  int
-	Text  byte
 	Edges map[*GraphPoint]int // V = distance
 }
 
@@ -140,7 +139,7 @@ func part2() int {
 			grid[y][x] = Point{x, y, text}
 
 			if text[0] != '#' {
-				graph[y][x] = &GraphPoint{0, x, y, text[0], make(map[*GraphPoint]int, 4)}
+				graph[y][x] = &GraphPoint{0, x, y, make(map[*GraphPoint]int, 4)}
 			}
 		}
 	}
@@ -152,16 +151,16 @@ func part2() int {
 				continue
 			}
 
-			if y > 0 && graph[y-1][x] != nil && graph[y-1][x].Text != '#' {
+			if y > 0 && graph[y-1][x] != nil {
 				point.Edges[graph[y-1][x]] = 1
 			}
-			if y < len(graph)-1 && graph[y+1][x] != nil && graph[y+1][x].Text != '#' {
+			if y < len(graph)-1 && graph[y+1][x] != nil {
 				point.Edges[graph[y+1][x]] = 1
 			}
-			if x > 0 && graph[y][x-1] != nil && graph[y][x-1].Text != '#' {
+			if x > 0 && graph[y][x-1] != nil {
 				point.Edges[graph[y][x-1]] = 1
 			}
-			if x < len(graph[0])-1 && graph[y][x+1] != nil && graph[y][x+1].Text != '#' {
+			if x < len(graph[0])-1 && graph[y][x+1] != nil {
 				point.Edges[graph[y][x+1]] = 1
 			}
 		}
