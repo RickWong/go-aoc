@@ -40,7 +40,7 @@ type Trail2 struct {
 }
 
 type GraphPoint struct {
-	Bit   uint64
+	Id    int
 	X, Y  int
 	Text  byte
 	Edges map[*GraphPoint]int // V = distance
@@ -195,21 +195,21 @@ func part2() int {
 	end := graph[len(grid)-1][strings.Index(lines[len(lines)-1], ".")]
 
 	// Re-assign IDs with BFS.
-	bit := uint64(0b1)
+	nextId := 1
 	queue := []*GraphPoint{start}
 	for len(queue) > 0 {
 		current := queue[0]
 		queue = queue[1:]
 
-		if current.Bit != 0 {
+		if current.Id != 0 {
 			continue
 		}
 
-		current.Bit = bit
-		bit <<= 1
+		current.Id = nextId
+		nextId++
 
 		for edge := range current.Edges {
-			if edge.Bit == 0 {
+			if edge.Id == 0 {
 				queue = append(queue, edge)
 			}
 		}
@@ -234,29 +234,29 @@ func part2() int {
 		eg.Go(func() error {
 			println("Starting goroutine")
 
-			visitedBits := start.Bit // Can't go back to start.
+			visitedBits := uint64(1 << start.Id) // Can't go back to start.
 
-			result := common.IterativeSearch[Trail2, int, int](
+			result := common.IterativeSearch[Trail2, uint64, int](
 				&Trail2{edge, distance, visitedBits},
 				func(t *Trail2) []*Trail2 {
 					branches := make([]*Trail2, 0, 3)
 					t.visited = t.visited + 0 // Copy.
 
 					for {
-						t.visited |= t.Bit
+						t.visited |= 1 << t.Id
 
 						for edge, steps := range t.Edges {
 							// Always take the last step, otherwise it cannot be taken later.
-							if edge.Bit == end.Bit {
+							if edge.Id == end.Id {
 								return []*Trail2{{edge, t.steps + steps, t.visited}}
 							}
 
-							if t.visited&edge.Bit == 0 {
+							if t.visited&(1<<edge.Id) == 0 {
 								branches = append(branches, &Trail2{edge, t.steps + steps, t.visited})
 							}
 						}
 
-						if len(branches) == 1 && branches[0].Bit != end.Bit {
+						if len(branches) == 1 && branches[0].Id != end.Id {
 							t = branches[0]
 							branches = branches[:0]
 							continue
@@ -266,7 +266,7 @@ func part2() int {
 					}
 				},
 				func(t *Trail2) bool {
-					return t.Bit == end.Bit
+					return t.Id == end.Id
 				},
 				// Don't use identity func to prune, the longest path could start off with a short path.
 				// Only use it if it also includes the edges left?
