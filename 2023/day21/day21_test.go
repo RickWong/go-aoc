@@ -21,7 +21,6 @@ var data = Input
 type Tile struct {
 	id   uint32
 	y, x int
-	Wall bool
 }
 
 // Helper functions.
@@ -38,8 +37,13 @@ func part1() int {
 	for y, line := range lines {
 		grid[y] = make([]*Tile, len(line))
 		for x, char := range line {
-			grid[y][x] = &Tile{nextId, y, x, char == '#'}
+			if char == '#' {
+				continue
+			}
+
+			grid[y][x] = &Tile{nextId, y, x}
 			nextId++
+
 			if char == 'S' {
 				start = grid[y][x]
 			}
@@ -50,25 +54,25 @@ func part1() int {
 		neighbors := make([]*Tile, 0, 4)
 		if y > 0 {
 			n := grid[y-1][x]
-			if !n.Wall && !visited.Contains(n.id) {
+			if n != nil && !visited.Contains(n.id) {
 				neighbors = append(neighbors, n)
 			}
 		}
 		if y < len(grid)-1 {
 			n := grid[y+1][x]
-			if !n.Wall && !visited.Contains(n.id) {
+			if n != nil && !visited.Contains(n.id) {
 				neighbors = append(neighbors, n)
 			}
 		}
 		if x > 0 {
 			n := grid[y][x-1]
-			if !n.Wall && !visited.Contains(n.id) {
+			if n != nil && !visited.Contains(n.id) {
 				neighbors = append(neighbors, n)
 			}
 		}
 		if x < len(grid[0])-1 {
 			n := grid[y][x+1]
-			if !n.Wall && !visited.Contains(n.id) {
+			if n != nil && !visited.Contains(n.id) {
 				neighbors = append(neighbors, n)
 			}
 		}
@@ -77,9 +81,9 @@ func part1() int {
 
 	// Find visited tiles per even number of steps.
 	visited := make(bitmap.Bitmap, 0, nextId/64+1)
-	queue := make([]*Tile, 0, 64)
+	queue := make([]*Tile, 0, 2000)
 	queue = append(queue, start)
-	nextQueue := make([]*Tile, 0, 64) // For each step, tracks the new tiles found.
+	nextQueue := make([]*Tile, 0, 300) // For each step, tracks the new tiles found.
 
 	for steps := 0; steps <= 64; steps++ {
 		for len(queue) > 0 {
