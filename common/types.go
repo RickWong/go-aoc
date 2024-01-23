@@ -14,6 +14,11 @@ func Atoi(s string) int {
 	return v
 }
 
+func Atoc(s string) uint8 {
+	v, _ := strconv.ParseInt(s, 10, 8)
+	return uint8(v)
+}
+
 func Atof(s string) float64 {
 	v, _ := strconv.ParseFloat(s, 64)
 	return v
