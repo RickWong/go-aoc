@@ -2,7 +2,7 @@ package day18
 
 import (
 	_ "embed"
-	common2 "github.com/RickWong/go-aoc/common"
+	"github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -38,16 +38,16 @@ var directions = map[byte]byte{
 
 func part1() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	points := make([]common2.Point2D[int], 1, 128)
-	points[0] = common2.Point2D[int]{X: 0, Y: 0}
+	points := make([]common.Point2D[int], 1, 128)
+	points[0] = common.Point2D[int]{X: 0, Y: 0}
 	boundary := 0
 
 	for _, line := range lines {
 		parts := strings.Fields(line)
-		direction, meters := parts[0][0], common2.Atoi(parts[1])
+		direction, meters := parts[0][0], common.Atoi(parts[1])
 
 		lastPoint := points[len(points)-1]
-		newPoint := common2.Point2D[int]{
+		newPoint := common.Point2D[int]{
 			Y: lastPoint.Y + deltas[direction][0]*meters,
 			X: lastPoint.X + deltas[direction][1]*meters,
 		}
@@ -55,8 +55,8 @@ func part1() int {
 		boundary += meters
 	}
 
-	area := int(common2.Shoelace(points))
-	interior := common2.PicksInterior(area, boundary)
+	area := int(common.Shoelace(points))
+	interior := common.PicksInterior(area, boundary)
 
 	return boundary + interior
 }
@@ -78,17 +78,17 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	points := make([]common2.Point2D[int], 1, 128)
-	points[0] = common2.Point2D[int]{X: 0, Y: 0}
+	points := make([]common.Point2D[int], 1, 128)
+	points[0] = common.Point2D[int]{X: 0, Y: 0}
 	boundary := 0
 
 	for _, line := range lines {
 		parts := strings.Fields(line)
 		color := parts[2][2 : len(parts[2])-1]
-		direction, meters := directions[color[5]], common2.Hexi(color[0:5])
+		direction, meters := directions[color[5]], common.Hexi(color[0:5])
 
 		lastPoint := points[len(points)-1]
-		newPoint := common2.Point2D[int]{
+		newPoint := common.Point2D[int]{
 			Y: lastPoint.Y + deltas[direction][0]*meters,
 			X: lastPoint.X + deltas[direction][1]*meters,
 		}
@@ -96,8 +96,8 @@ func part2() int {
 		boundary += meters
 	}
 
-	area := int(common2.Shoelace(points))
-	interior := common2.PicksInterior(area, boundary)
+	area := int(common.Shoelace(points))
+	interior := common.PicksInterior(area, boundary)
 
 	return boundary + interior
 }

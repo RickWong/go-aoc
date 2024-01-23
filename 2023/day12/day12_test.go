@@ -2,7 +2,7 @@ package day12
 
 import (
 	_ "embed"
-	common2 "github.com/RickWong/go-aoc/common"
+	"github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 	"runtime"
@@ -21,13 +21,20 @@ var data = Input
 
 // Data types.
 
+type State struct {
+	Springs string
+	Groups  []int
+}
+
 // Helper functions.
 
-func memoizedCountPossible(opts *common2.MemoOptions[int]) func(string, []int) int {
-	var countPossible func(string, []int) int
+func memoizedCountPossible(cache *map[string]int) func(st State) int {
+	var countPossible func(State) int
 
-	countPossible = common2.Memo2(
-		func(s string, c []int) int {
+	countPossible = common.HashedMemo(
+		func(st State) int {
+			s := st.Springs
+			c := st.Groups
 			s = strings.TrimLeft(s, ".")
 
 			if len(s) == 0 {
@@ -63,11 +70,11 @@ func memoizedCountPossible(opts *common2.MemoOptions[int]) func(string, []int) i
 					return 0
 				}
 
-				return countPossible(s[c[0]+1:], c[1:])
+				return countPossible(State{s[c[0]+1:], c[1:]})
 			}
 
-			return countPossible("#"+s[1:], c) + countPossible(s[1:], c)
-		}, opts)
+			return countPossible(State{"#" + s[1:], c}) + countPossible(State{s[1:], c})
+		}, nil, cache)
 
 	return countPossible
 }
@@ -96,10 +103,10 @@ func part1() int {
 
 				springs := row[0]
 				sizes := row[1]
-				groups := common2.Map(strings.Split(sizes, ","), common2.Atoi)
-				countPossible := memoizedCountPossible(&common2.MemoOptions[int]{Cache: caches[i]})
+				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+				countPossible := memoizedCountPossible(&caches[i])
 
-				res := countPossible(springs, groups)
+				res := countPossible(State{springs, groups})
 				if res >= 0 {
 					atomic.AddInt64(&sum, int64(res))
 				}
@@ -148,10 +155,10 @@ func part2() int {
 
 				springs := row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0] + "?" + row[0]
 				sizes := row[1] + "," + row[1] + "," + row[1] + "," + row[1] + "," + row[1]
-				groups := common2.Map(strings.Split(sizes, ","), common2.Atoi)
-				countPossible := memoizedCountPossible(&common2.MemoOptions[int]{Cache: caches[i]})
+				groups := common.Map(strings.Split(sizes, ","), common.Atoi)
+				countPossible := memoizedCountPossible(&caches[i])
 
-				res := countPossible(springs, groups)
+				res := countPossible(State{springs, groups})
 				if res >= 0 {
 					atomic.AddInt64(&sum, int64(res))
 				}

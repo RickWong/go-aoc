@@ -2,7 +2,7 @@ package day06
 
 import (
 	_ "embed"
-	common2 "github.com/RickWong/go-aoc/common"
+	"github.com/RickWong/go-aoc/common"
 	"math"
 	"strings"
 	"testing"
@@ -18,8 +18,8 @@ var data = Input
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	times := common2.Map(strings.Fields(lines[0])[1:], common2.Atoi)
-	distances := common2.Map(strings.Fields(lines[1])[1:], common2.Atoi)
+	times := common.Map(strings.Fields(lines[0])[1:], common.Atoi)
+	distances := common.Map(strings.Fields(lines[1])[1:], common.Atoi)
 	numWaysToWin := make([]int, len(times))
 
 	for i, time := range times {
@@ -31,7 +31,7 @@ func part1() int {
 		}
 	}
 
-	return common2.Product(numWaysToWin)
+	return common.Product(numWaysToWin)
 }
 
 func TestPart1(t *testing.T) {
@@ -50,8 +50,8 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	time := common2.Atof(strings.Join(strings.Fields(lines[0])[1:], ""))
-	distance := common2.Atof(strings.Join(strings.Fields(lines[1])[1:], ""))
+	time := common.Atof(strings.Join(strings.Fields(lines[0])[1:], ""))
+	distance := common.Atof(strings.Join(strings.Fields(lines[1])[1:], ""))
 
 	maxRoot := math.Floor(time + math.Sqrt(time*time-4*distance)/2)
 	minRoot := math.Ceil(time - math.Sqrt(time*time-4*distance)/2)

@@ -128,7 +128,9 @@ func calculateDistances(start *Point, size int) int {
 	maxDistance := 0
 
 	for len(unvisited) > 0 {
+		// TODO use ring queue
 		current := unvisited[0]
+		unvisited[0] = nil
 		unvisited = unvisited[1:]
 		visited[uint32(current.y<<8|current.x)] = true
 

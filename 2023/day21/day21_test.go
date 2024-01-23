@@ -88,6 +88,7 @@ func part1() int {
 	for steps := 0; steps <= 64; steps++ {
 		for len(queue) > 0 {
 			cur := queue[len(queue)-1]
+			queue[len(queue)-1] = nil
 			queue = queue[: len(queue)-1 : cap(queue)]
 
 			if visited.Contains(cur.id) {

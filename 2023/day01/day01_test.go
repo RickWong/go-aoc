@@ -2,7 +2,7 @@ package day01
 
 import (
 	_ "embed"
-	common2 "github.com/RickWong/go-aoc/common"
+	"github.com/RickWong/go-aoc/common"
 	"strings"
 	"testing"
 )
@@ -29,7 +29,7 @@ func calibrate(s string) int {
 
 func part1() int {
 	lines := strings.Split(data, "\n")
-	return common2.Sum(common2.Map(lines, calibrate))
+	return common.Sum(common.Map(lines, calibrate))
 }
 
 func TestPart1(t *testing.T) {
@@ -75,7 +75,7 @@ func translate(s string) string {
 
 func part2() int {
 	lines := strings.Split(data, "\n")
-	return common2.Sum(common2.Map(lines, func(s string) int {
+	return common.Sum(common.Map(lines, func(s string) int {
 		return calibrate(translate(s))
 	}))
 }

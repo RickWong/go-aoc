@@ -102,7 +102,9 @@ func part2() int {
 		var visited []*Point
 
 		for len(queue) > 0 {
+			// TODO use ring queue
 			current := queue[0]
+			queue[0] = nil
 			queue = queue[1:]
 			if slices.Contains(visited, current) {
 				continue

@@ -39,6 +39,7 @@ func traceBeam(grid [][]byte, beam Beam) LUT {
 
 	beams = append(beams, beam)
 	for len(beams) > 0 {
+		// TODO use ring queue
 		beam := beams[0]
 		beams = beams[1:]
 

@@ -107,7 +107,9 @@ func assignGraphIDs(start *GraphPoint) {
 	nextId := 1
 	queue := []*GraphPoint{start}
 	for len(queue) > 0 {
+		// TODO use ring queue
 		current := queue[0]
+		queue[0] = nil
 		queue = queue[1:]
 
 		if current.Id != 0 {
@@ -177,6 +179,7 @@ func part1() int {
 
 				if len(branches) == 1 && branches[0].Point != end {
 					t = branches[0]
+					branches[0] = nil
 					branches = branches[:0]
 					continue
 				}
@@ -281,6 +284,7 @@ func part2() int {
 
 						if len(branches) == 1 && branches[0].Id != end.Id {
 							t = branches[0]
+							branches[0] = nil
 							branches = branches[:0]
 							continue
 						}
