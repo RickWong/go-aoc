@@ -65,7 +65,7 @@ func part1() int {
 					if cur.x+i < len(grid[cur.y]) {
 						cumLoss += grid[cur.y][cur.x+i].loss
 						branches = append(branches,
-							&Trail{cur.y, cur.x + i, cumLoss, 3})
+							&Trail{cur.y, cur.x + i, cumLoss, 1})
 					}
 				}
 			}
@@ -84,7 +84,7 @@ func part1() int {
 					if cur.y+i < len(grid) {
 						cumLoss += grid[cur.y+i][cur.x].loss
 						branches = append(branches,
-							&Trail{cur.y + i, cur.x, cumLoss, 4})
+							&Trail{cur.y + i, cur.x, cumLoss, 2})
 					}
 				}
 			}
@@ -94,14 +94,14 @@ func part1() int {
 		func(cur *Trail) bool {
 			return cur.y == end.y && cur.x == end.x
 		},
-		func(cur *Trail) uint64 {
-			return uint64(cur.y<<32 | cur.x<<16 | cur.direction)
+		func(cur *Trail) int {
+			return cur.y<<20 | cur.x<<10 | cur.direction
 		},
 		func(cur *Trail, _ int) int {
 			return cur.cumLoss
 		},
 		func(cur *Trail) int {
-			return common.Manhattan(cur.x, cur.y, end.x, end.y)
+			return common.Manhattan(cur.y, cur.x, end.y, end.x)
 		},
 		0,
 		true,
@@ -135,11 +135,12 @@ func part2() int {
 
 	start := Trail{}
 	end := &grid[len(grid)-1][len(grid[0])-1]
+	minSteps := 4
+	maxSteps := 10
+
 	result := common.IterativeSearch(
 		&start,
 		func(cur *Trail) []*Trail {
-			minSteps := 4
-			maxSteps := 10
 			branches := make([]*Trail, 0, maxSteps*2)
 			cumLoss := 0
 
@@ -160,7 +161,7 @@ func part2() int {
 						cumLoss += grid[cur.y][cur.x+i].loss
 						if i >= minSteps {
 							branches = append(branches,
-								&Trail{cur.y, cur.x + i, cumLoss, 3})
+								&Trail{cur.y, cur.x + i, cumLoss, 1})
 						}
 					}
 				}
@@ -183,7 +184,7 @@ func part2() int {
 						cumLoss += grid[cur.y+i][cur.x].loss
 						if i >= minSteps {
 							branches = append(branches,
-								&Trail{cur.y + i, cur.x, cumLoss, 4})
+								&Trail{cur.y + i, cur.x, cumLoss, 2})
 						}
 					}
 				}
@@ -194,14 +195,14 @@ func part2() int {
 		func(cur *Trail) bool {
 			return cur.y == end.y && cur.x == end.x
 		},
-		func(cur *Trail) uint64 {
-			return uint64(cur.y<<32 | cur.x<<16 | cur.direction)
+		func(cur *Trail) int {
+			return cur.y<<20 | cur.x<<10 | cur.direction
 		},
 		func(cur *Trail, _ int) int {
 			return cur.cumLoss
 		},
 		func(cur *Trail) int {
-			return common.Manhattan(cur.x, cur.y, end.x, end.y)
+			return common.Manhattan(cur.y, cur.x, end.y, end.x)
 		},
 		0,
 		true,

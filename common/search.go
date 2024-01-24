@@ -22,7 +22,7 @@ type heapItem[T any, W Number] struct {
 	branch   *T
 }
 
-func IterativeSearch[T any, H Hashable, W Number](
+func IterativeSearch[T any, H comparable, W Number](
 	root *T,
 	// branches are possible iterations based on the current branch.
 	branchFn func(branch *T) []*T,

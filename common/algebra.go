@@ -67,6 +67,21 @@ func Manhattan[N Number](x1 N, y1 N, x2 N, y2 N) N {
 	return diffY + diffX
 }
 
+func Octile[N Number](x1 N, y1 N, x2 N, y2 N) N {
+	diffY := y2 - y1
+	diffX := x2 - x1
+	if diffY < 0 {
+		diffY = -diffY
+	}
+	if diffX < 0 {
+		diffX = -diffX
+	}
+	if diffY > diffX {
+		return diffY + N(float64(diffX)*0.41421356237)
+	}
+	return diffX + N(float64(diffY)*0.41421356237)
+}
+
 func Pythagoras[N Number](x1 N, y1 N, x2 N, y2 N) N {
 	diffY := y2 - y1
 	diffX := x2 - x1

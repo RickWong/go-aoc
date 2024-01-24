@@ -7,7 +7,6 @@ import (
 	"golang.org/x/sync/errgroup"
 	"runtime"
 	"strings"
-	"sync/atomic"
 	"testing"
 )
 
@@ -88,10 +87,10 @@ func part1() int {
 	numThreads := runtime.NumCPU()
 	eg := errgroup.Group{}
 	eg.SetLimit(numThreads)
-	sum := int64(0)
 
 	caches := make([]map[State]int, numThreads)
 	pageSize := len(lines) / numThreads
+	results := make([]int, numThreads)
 	for i := 0; i < numThreads; i++ {
 		i := i
 		caches[i] = make(map[State]int, 1024)
@@ -112,7 +111,7 @@ func part1() int {
 				copy(groupsArr[:], groups)
 				res := countPossible(State{springs, groupsArr})
 				if res >= 0 {
-					atomic.AddInt64(&sum, int64(res))
+					results[i] += res
 				}
 			}
 			return nil
@@ -120,7 +119,7 @@ func part1() int {
 	}
 
 	_ = eg.Wait()
-	return int(sum)
+	return common.Sum(results)
 }
 
 func TestPart1(t *testing.T) {
@@ -142,10 +141,10 @@ func part2() int {
 	numThreads := runtime.NumCPU()
 	eg := errgroup.Group{}
 	eg.SetLimit(numThreads)
-	sum := int64(0)
 
 	caches := make([]map[State]int, numThreads)
 	pageSize := len(lines) / numThreads
+	results := make([]int, numThreads)
 	for i := 0; i < numThreads; i++ {
 		i := i
 		caches[i] = make(map[State]int, 64*1024)
@@ -166,7 +165,7 @@ func part2() int {
 				copy(groupsArr[:], groups)
 				res := countPossible(State{springs, groupsArr})
 				if res >= 0 {
-					atomic.AddInt64(&sum, int64(res))
+					results[i] += res
 				}
 			}
 			return nil
@@ -174,7 +173,7 @@ func part2() int {
 	}
 
 	_ = eg.Wait()
-	return int(sum)
+	return common.Sum(results)
 }
 
 func TestPart2(t *testing.T) {

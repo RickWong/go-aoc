@@ -21,11 +21,11 @@ var data = Input
 
 // Helper functions.
 
-func printAndSum(grid [][]string) int {
+func printAndSum(grid [][]byte) int {
 	sum := 0
 	for y := range grid {
 		for x := range grid[y] {
-			if grid[y][x] == "O" {
+			if grid[y][x] == 'O' {
 				sum += len(grid) - y
 			}
 			//print(grid[y][x])
@@ -35,17 +35,19 @@ func printAndSum(grid [][]string) int {
 	return sum
 }
 
-func tiltEast(grid [][]string) {
-	for y := 0; y < len(grid[0]); y++ {
-		right := len(grid) - 1
+func tiltEast(grid [][]byte) {
+	width := len(grid[0])
+	height := len(grid)
+	for y := 0; y < height; y++ {
+		right := width - 1
 		for x := right; x >= 0; x-- {
 			switch grid[y][x] {
-			case "#":
+			case '#':
 				right = x - 1
-			case "O":
+			case 'O':
 				if right != x {
-					grid[y][right] = "O"
-					grid[y][x] = "."
+					grid[y][right] = 'O'
+					grid[y][x] = '.'
 				}
 				right--
 			}
@@ -53,17 +55,19 @@ func tiltEast(grid [][]string) {
 	}
 }
 
-func tiltSouth(grid [][]string) {
-	for x := 0; x < len(grid[0]); x++ {
-		top := len(grid) - 1
+func tiltSouth(grid [][]byte) {
+	width := len(grid[0])
+	height := len(grid)
+	for x := 0; x < width; x++ {
+		top := height - 1
 		for y := top; y >= 0; y-- {
 			switch grid[y][x] {
-			case "#":
+			case '#':
 				top = y - 1
-			case "O":
+			case 'O':
 				if top != y {
-					grid[top][x] = "O"
-					grid[y][x] = "."
+					grid[top][x] = 'O'
+					grid[y][x] = '.'
 				}
 				top--
 			}
@@ -71,17 +75,19 @@ func tiltSouth(grid [][]string) {
 	}
 }
 
-func tiltWest(grid [][]string) {
-	for y := 0; y < len(grid[0]); y++ {
+func tiltWest(grid [][]byte) {
+	width := len(grid[0])
+	height := len(grid)
+	for y := 0; y < height; y++ {
 		left := 0
-		for x := left; x < len(grid); x++ {
+		for x := left; x < width; x++ {
 			switch grid[y][x] {
-			case "#":
+			case '#':
 				left = x + 1
-			case "O":
+			case 'O':
 				if left != x {
-					grid[y][left] = "O"
-					grid[y][x] = "."
+					grid[y][left] = 'O'
+					grid[y][x] = '.'
 				}
 				left++
 			}
@@ -89,17 +95,19 @@ func tiltWest(grid [][]string) {
 	}
 }
 
-func tiltNorth(grid [][]string) {
-	for x := 0; x < len(grid[0]); x++ {
+func tiltNorth(grid [][]byte) {
+	width := len(grid[0])
+	height := len(grid)
+	for x := 0; x < width; x++ {
 		bottom := 0
-		for y := bottom; y < len(grid); y++ {
+		for y := bottom; y < height; y++ {
 			switch grid[y][x] {
-			case "#":
+			case '#':
 				bottom = y + 1
-			case "O":
+			case 'O':
 				if bottom != y {
-					grid[bottom][x] = "O"
-					grid[y][x] = "."
+					grid[bottom][x] = 'O'
+					grid[y][x] = '.'
 				}
 				bottom++
 			}
@@ -157,7 +165,7 @@ func TestPart1(t *testing.T) {
 
 func part2() int {
 	lines := strings.Split(strings.TrimSpace(data), "\n")
-	grid := common.Map(lines, func(line string) []string { return strings.Split(line, "") })
+	grid := common.Map(lines, func(line string) []byte { return []byte(line) })
 
 	genCycles := 1000
 	checksums := make(map[uint32]int, genCycles)
@@ -169,20 +177,24 @@ func part2() int {
 		tiltSouth(grid)
 		tiltEast(grid)
 
-		bytes := []byte(
-			strings.Join(
-				common.Map(grid, func(row []string) string { return strings.Join(row, "") }),
-				"",
-			),
-		)
+		hash := crc32.New(crc32.IEEETable)
+		sum := 0
+		for y := range grid {
+			_, _ = hash.Write(grid[y])
+			for x := range grid[y] {
+				if grid[y][x] == 'O' {
+					sum += len(grid) - y
+				}
+			}
+		}
 
-		checksum := crc32.ChecksumIEEE(bytes)
+		checksum := hash.Sum32()
 		if start, found := checksums[checksum]; found {
 			return sums[start+((1000000000-start)%(i-start))-1]
 		}
 
 		checksums[checksum] = i
-		sums[i] = printAndSum(grid)
+		sums[i] = sum
 	}
 
 	return 0
@@ -204,7 +216,7 @@ func TestPart2(t *testing.T) {
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		part1()
+		//part1()
 		part2()
 	}
 }
