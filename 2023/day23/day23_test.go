@@ -153,7 +153,7 @@ func part1() int {
 	start := &grid[0][strings.Index(lines[0], ".")]
 	end := &grid[len(grid)-1][strings.Index(lines[len(lines)-1], ".")]
 
-	result := common.IterativeSearch(
+	result := common.BucketSearch(
 		&Trail{start, 0, nil},
 		func(t *Trail) []*Trail {
 			branches := make([]*Trail, 0, 3)
@@ -197,7 +197,7 @@ func part1() int {
 			return t.steps
 		},
 		nil,
-		0,
+		-1000,
 		false,
 		true,
 	)
@@ -259,7 +259,7 @@ func part2() int {
 		distance := start.Edges[edge]
 
 		eg.Go(func() error {
-			result := common.IterativeSearch[GraphTrail, uint64, int](
+			result := common.BucketSearch[GraphTrail, uint64, int](
 				&GraphTrail{edge, distance, visited},
 				func(t *GraphTrail) []*GraphTrail {
 					branches := make([]*GraphTrail, 0, 3)
@@ -304,7 +304,7 @@ func part2() int {
 					return t.steps
 				},
 				nil,
-				0,
+				-1000,
 				false,
 				true,
 			)

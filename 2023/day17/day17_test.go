@@ -43,7 +43,7 @@ func part1() int {
 
 	start := Trail{}
 	end := &grid[len(grid)-1][len(grid[0])-1]
-	result := common.IterativeSearch(
+	result := common.BucketSearch(
 		&start,
 		func(cur *Trail) []*Trail {
 			minSteps := 1
@@ -103,7 +103,7 @@ func part1() int {
 		func(cur *Trail) int {
 			return common.Manhattan(cur.y, cur.x, end.y, end.x)
 		},
-		0,
+		8,
 		true,
 		false,
 	)
@@ -138,7 +138,7 @@ func part2() int {
 	minSteps := 4
 	maxSteps := 10
 
-	result := common.IterativeSearch(
+	result := common.BucketSearch(
 		&start,
 		func(cur *Trail) []*Trail {
 			branches := make([]*Trail, 0, maxSteps*2)
@@ -204,7 +204,7 @@ func part2() int {
 		func(cur *Trail) int {
 			return common.Manhattan(cur.y, cur.x, end.y, end.x)
 		},
-		0,
+		8,
 		true,
 		false,
 	)
