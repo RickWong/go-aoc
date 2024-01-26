@@ -2,6 +2,7 @@ package day10
 
 import (
 	_ "embed"
+	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
@@ -123,22 +124,20 @@ func part1() int {
 func calculateDistances(start *Point, size int) int {
 	unvisited := make([]*Point, 0, size)
 	unvisited = append(unvisited, start)
-	// TODO: Use bitset
-	visited := make(map[uint32]bool, size)
+	visited := bitmap.Bitmap{}
 	maxDistance := 0
 
 	for len(unvisited) > 0 {
-		// TODO use ring queue
 		current := unvisited[0]
 		unvisited[0] = nil
 		unvisited = unvisited[1:]
-		visited[uint32(current.y<<8|current.x)] = true
+		visited.Set(uint32(current.y<<8 | current.x))
 
 		current.loop = true
 		maxDistance = max(maxDistance, current.distance)
 
 		for _, next := range current.next {
-			if !visited[uint32(next.y<<8|next.x)] {
+			if !visited.Contains(uint32(next.y<<8 | next.x)) {
 				next.distance = current.distance + 1
 				unvisited = append(unvisited, next)
 			}

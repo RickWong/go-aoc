@@ -144,6 +144,6 @@ func TestPart2(t *testing.T) {
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		part1()
-		//part2()
+		part2()
 	}
 }

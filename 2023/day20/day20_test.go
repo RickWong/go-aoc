@@ -52,7 +52,6 @@ func part1() int {
 	}
 
 	// For each output, store false values for each input.
-	// TODO: Use bitset
 	memory := make(map[string]map[string]bool)
 	for _, module := range modules {
 		for _, output := range module.outputs {
@@ -135,7 +134,6 @@ func part2() int {
 	}
 
 	// For each output, store false values for each input.
-	// TODO: Use bitset
 	memory := make(map[string]map[string]bool)
 	for _, module := range modules {
 		for _, output := range module.outputs {

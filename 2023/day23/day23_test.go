@@ -3,6 +3,7 @@ package day23
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/common"
+	"github.com/edwingeng/deque/v2"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
@@ -105,13 +106,10 @@ func parseGraph(lines []string) [][]*GraphPoint {
 
 func assignGraphIDs(start *GraphPoint) {
 	nextId := 1
-	queue := []*GraphPoint{start}
-	for len(queue) > 0 {
-		// TODO use ring queue
-		current := queue[0]
-		queue[0] = nil
-		queue = queue[1:]
-
+	queue := deque.NewDeque[*GraphPoint](deque.WithChunkSize(16))
+	queue.PushBack(start)
+	for !queue.IsEmpty() {
+		current := queue.PopFront()
 		if current.Id != 0 {
 			continue
 		}
@@ -121,7 +119,7 @@ func assignGraphIDs(start *GraphPoint) {
 
 		for edge := range current.Edges {
 			if edge.Id == 0 {
-				queue = append(queue, edge)
+				queue.PushBack(edge)
 			}
 		}
 	}

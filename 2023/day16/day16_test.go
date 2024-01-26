@@ -3,6 +3,7 @@ package day16
 import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/common"
+	"github.com/edwingeng/deque/v2"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
 	"strings"
@@ -30,18 +31,15 @@ type LUT map[int]struct{}
 // Helper functions.
 
 func traceBeam(grid [][]byte, beam Beam) LUT {
-	beams := make([]Beam, 0, 1024)
-	// TODO: Use bitset
 	history := make(map[Beam]bool, 1024)
 	height := len(grid)
 	width := len(grid[0])
 	lut := make(map[int]struct{}, height*width)
 
-	beams = append(beams, beam)
-	for len(beams) > 0 {
-		// TODO use ring queue
-		beam := beams[0]
-		beams = beams[1:]
+	beams := deque.NewDeque[Beam](deque.WithChunkSize(1024))
+	beams.PushBack(beam)
+	for !beams.IsEmpty() {
+		beam := beams.PopBack()
 
 		if _, ok := history[beam]; ok {
 			continue
@@ -59,28 +57,28 @@ func traceBeam(grid [][]byte, beam Beam) LUT {
 
 			tile := grid[y][x]
 			if tile == '|' {
-				beams = append(beams, Beam{y, x, -1, 0})
-				beams = append(beams, Beam{y, x, 1, 0})
+				beams.PushBack(Beam{y, x, -1, 0})
+				beams.PushBack(Beam{y, x, 1, 0})
 				break
 			}
 			if tile == '-' {
-				beams = append(beams, Beam{y, x, 0, -1})
-				beams = append(beams, Beam{y, x, 0, 1})
+				beams.PushBack(Beam{y, x, 0, -1})
+				beams.PushBack(Beam{y, x, 0, 1})
 				break
 			}
 			if tile == '/' {
 				if beam.dy != 0 {
-					beams = append(beams, Beam{y, x, 0, -beam.dy})
+					beams.PushBack(Beam{y, x, 0, -beam.dy})
 				} else {
-					beams = append(beams, Beam{y, x, -beam.dx, 0})
+					beams.PushBack(Beam{y, x, -beam.dx, 0})
 				}
 				break
 			}
 			if tile == '\\' {
 				if beam.dy != 0 {
-					beams = append(beams, Beam{y, x, 0, beam.dy})
+					beams.PushBack(Beam{y, x, 0, beam.dy})
 				} else {
-					beams = append(beams, Beam{y, x, beam.dx, 0})
+					beams.PushBack(Beam{y, x, beam.dx, 0})
 				}
 				break
 			}

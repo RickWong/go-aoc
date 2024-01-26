@@ -2,6 +2,7 @@ package day11
 
 import (
 	_ "embed"
+	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
 	"math"
 	"strings"
@@ -28,9 +29,8 @@ type Point struct {
 func parseGridAndGalaxies(lines []string, repeatSpace int) ([][]Point, []*Point) {
 	grid := make([][]Point, len(lines))
 	galaxies := make([]*Point, 0, 100)
-	// TODO: Use bitset
-	rowsWithGalaxy := make(map[int]bool)
-	colsWithGalaxy := make(map[int]bool)
+	rowsWithGalaxy := bitmap.Bitmap{}
+	colsWithGalaxy := bitmap.Bitmap{}
 
 	for y, line := range lines {
 		grid[y] = make([]Point, len(line))
@@ -40,8 +40,8 @@ func parseGridAndGalaxies(lines []string, repeatSpace int) ([][]Point, []*Point)
 
 			if grid[y][x].galaxy {
 				galaxies = append(galaxies, &grid[y][x])
-				rowsWithGalaxy[y] = true
-				colsWithGalaxy[x] = true
+				rowsWithGalaxy.Set(uint32(y))
+				colsWithGalaxy.Set(uint32(x))
 			}
 		}
 	}
@@ -50,7 +50,7 @@ func parseGridAndGalaxies(lines []string, repeatSpace int) ([][]Point, []*Point)
 
 	offset := 0
 	for y := range lines {
-		if !rowsWithGalaxy[y] {
+		if !rowsWithGalaxy.Contains(uint32(y)) {
 			for _, g := range galaxies {
 				if g.y > y+offset {
 					g.y += repeatSpace - 1
@@ -62,7 +62,7 @@ func parseGridAndGalaxies(lines []string, repeatSpace int) ([][]Point, []*Point)
 
 	offset = 0
 	for x := range lines[0] {
-		if !colsWithGalaxy[x] {
+		if !colsWithGalaxy.Contains(uint32(x)) {
 			for _, g := range galaxies {
 				if g.x > x+offset {
 					g.x += repeatSpace - 1
