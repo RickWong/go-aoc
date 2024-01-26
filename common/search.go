@@ -170,7 +170,7 @@ func BucketSearch[T any, H comparable, W Number](
 	now := time.Now().UnixMilli()
 
 	prioFn := func(priority W) int { return max(0, int(priority)/priorityScale) }
-	queue := NewBucketQueue[*heapItem[T, W]](128, 8)
+	queue := NewBucketQueue[*heapItem[T, W]](64, 64)
 
 	trail := make(map[H]*T, 32)
 	weights := make(map[H]W, 1024)
