@@ -114,3 +114,20 @@ func Shoelace[N Number](points []Point2D[N]) float64 {
 func PicksInterior[N Number](area N, boundary N) N {
 	return area - boundary/2 + 1
 }
+
+func EuclideanMod[N constraints.Integer](n N, div N) N {
+	remainder := ((n % div) + div) % div
+	return remainder
+}
+
+func FindQuadraticCoefficients[N Number](y0, y1, y2 N) (N, N, N) {
+	a := (y2 - (2 * y1) + y0) / 2
+	b := y1 - y0 - a
+	c := y0
+	return a, b, c
+}
+
+func SolveQuadratic[N Number](a, b, c, x N) N {
+	y := a*x*x + b*x + c
+	return y
+}

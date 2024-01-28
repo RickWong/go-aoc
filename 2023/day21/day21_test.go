@@ -2,8 +2,10 @@ package day21
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/common"
 	"github.com/kelindar/bitmap"
 	"github.com/stretchr/testify/assert"
+	"math"
 	"strings"
 	"testing"
 )
@@ -80,33 +82,30 @@ func part1() int {
 	}
 
 	// Find visited tiles per even number of steps.
+	queue := make([]*Tile, 0, 1000)
+	nextQueue := make([]*Tile, 0, 1000)
 	visited := make(bitmap.Bitmap, 0, nextId/64+1)
-	queue := make([]*Tile, 0, 2000)
+	numVisited := 0
+
 	queue = append(queue, start)
-	nextQueue := make([]*Tile, 0, 300) // For each step, tracks the new tiles found.
-
 	for steps := 0; steps <= 64; steps++ {
-		for len(queue) > 0 {
-			cur := queue[len(queue)-1]
-			queue[len(queue)-1] = nil
-			queue = queue[: len(queue)-1 : cap(queue)]
-
+		for _, cur := range queue {
 			if visited.Contains(cur.id) {
 				continue
 			}
 
 			if steps%2 == 0 {
 				visited.Set(cur.id)
+				numVisited++
 			}
 
 			nextQueue = append(nextQueue, findNeighbors(cur.y, cur.x, visited)...)
 		}
 
-		queue, nextQueue = nextQueue, queue
+		queue, nextQueue = nextQueue, queue[:0:cap(queue)]
 	}
 
-	sum := visited.Count()
-	return sum
+	return numVisited
 }
 
 func TestPart1(t *testing.T) {
@@ -123,8 +122,94 @@ func TestPart1(t *testing.T) {
 
 // Part 2.
 
+func toID(y, x int) uint32 {
+	return uint32(y+math.MaxInt16)<<16 | uint32(x+math.MaxInt16)
+}
+
+func fromID(id uint32) (int, int) {
+	y := int(id>>16) - math.MaxInt16
+	x := int(id&0xffff) - math.MaxInt16
+	return y, x
+}
+
+func TestToID(t *testing.T) {
+	t.Parallel()
+	assert.Equal(t, uint32(0x7fff7fff), toID(0, 0))
+	assert.Equal(t, uint32(0x7fff8000), toID(0, 1))
+	assert.Equal(t, uint32(0x80007fff), toID(1, 0))
+	assert.Equal(t, uint32(0x7fff7ffe), toID(0, -1))
+	assert.Equal(t, uint32(0x7ffe7fff), toID(-1, 0))
+	assert.Equal(t, uint32(0x7ffe7ffe), toID(-1, -1))
+	y, x := fromID(0x7ffe7ffe)
+	assert.Equal(t, -1, y)
+	assert.Equal(t, -1, x)
+	y, x = fromID(0x80008000)
+	assert.Equal(t, 1, y)
+	assert.Equal(t, 1, x)
+}
+
 func part2() int {
-	return 0
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	height := len(lines)
+	width := len(lines[0])
+	start := width / 2
+
+	isWalkable := func(y, x int) bool {
+		return lines[common.EuclideanMod(y, height)][common.EuclideanMod(x, width)] != '#'
+	}
+
+	findNeighbors := func(ID uint32, visited bitmap.Bitmap) []uint32 {
+		neighbors := make([]uint32, 0, 4)
+		y, x := fromID(ID)
+
+		if isWalkable(y-1, x) && !visited.Contains(toID(y-1, x)) {
+			neighbors = append(neighbors, toID(y-1, x))
+		}
+		if isWalkable(y+1, x) && !visited.Contains(toID(y+1, x)) {
+			neighbors = append(neighbors, toID(y+1, x))
+		}
+		if isWalkable(y, x-1) && !visited.Contains(toID(y, x-1)) {
+			neighbors = append(neighbors, toID(y, x-1))
+		}
+		if isWalkable(y, x+1) && !visited.Contains(toID(y, x+1)) {
+			neighbors = append(neighbors, toID(y, x+1))
+		}
+
+		return neighbors
+	}
+
+	queues := [2][]uint32{make([]uint32, 0, 5400), make([]uint32, 0, 5400)}
+	counts := [2]int{}
+	visited := make(bitmap.Bitmap, 0, 34000000)
+	goalSteps := 26501365
+	yForX := make(map[int]int, 3)
+
+	queues[0] = append(queues[0], toID(start, start))
+	for steps := 0; steps <= 3*width; steps++ {
+		parity := steps % 2
+		nextParity := (steps + 1) % 2
+		queues[nextParity] = queues[nextParity][:0:cap(queues[nextParity])]
+
+		for _, curID := range queues[parity] {
+			if !visited.Contains(curID) {
+				visited.Set(curID)
+				counts[parity]++
+				queues[nextParity] = append(queues[nextParity], findNeighbors(curID, visited)...)
+			}
+		}
+
+		isPointOnCurve := (steps-start)%width == 0
+		if isPointOnCurve {
+			yForX[steps/width] = counts[parity]
+			if len(yForX) == 3 {
+				break
+			}
+		}
+	}
+
+	a, b, c := common.FindQuadraticCoefficients(yForX[0], yForX[1], yForX[2])
+	x := goalSteps / width
+	return common.SolveQuadratic(a, b, c, x)
 }
 
 func TestPart2(t *testing.T) {
@@ -133,9 +218,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 16733044, result)
+		assert.Equal(t, 528192899606863, result)
 	} else {
-		assert.Equal(t, 357134560737, result)
+		assert.Equal(t, 605247138198755, result)
 	}
 }
 
@@ -143,7 +228,7 @@ func TestPart2(t *testing.T) {
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		part1()
+		//part1()
 		part2()
 	}
 }
