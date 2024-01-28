@@ -5,7 +5,6 @@ import (
 	. "github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
-	"regexp"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -28,27 +27,27 @@ type Voxel struct {
 }
 
 type Brick struct {
-	id    int
-	start Voxel
-	end   Voxel
-	cubes []Voxel
+	id     int
+	startZ int
+	endX   int
+	cubes  []Voxel
 }
 
 // Helper functions.
 
-func Cubes(b *Brick) []Voxel {
-	if b.start.x > b.end.x ||
-		b.start.y > b.end.y ||
-		b.start.z > b.end.z {
+func Cubes(id, startX, startY, startZ, endX, endY, endZ int) []Voxel {
+	if startX > endX ||
+		startY > endY ||
+		startZ > endZ {
 		panic("inverse brick")
 	}
 
-	res := make([]Voxel, 0, (b.end.x-b.start.x+1)*(b.end.y-b.start.y+1)*(b.end.z-b.start.z+1))
+	res := make([]Voxel, 0, (endX-startX+1)*(endY-startY+1)*(endZ-startZ+1))
 
-	for x := b.start.x; x <= b.end.x; x++ {
-		for y := b.start.y; y <= b.end.y; y++ {
-			for z := b.start.z; z <= b.end.z; z++ {
-				res = append(res, Voxel{b.id, x, y, z})
+	for x := startX; x <= endX; x++ {
+		for y := startY; y <= endY; y++ {
+			for z := startZ; z <= endZ; z++ {
+				res = append(res, Voxel{id, x, y, z})
 			}
 		}
 	}
@@ -57,8 +56,8 @@ func Cubes(b *Brick) []Voxel {
 }
 
 // calculateDroppedHeights returns the heights of the bricks after dropping.
-func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[int]int) map[int]int {
-	heights := make(map[int]int, len(bricks))
+func calculateDroppedHeights(bricks []Brick, skip int, checkHeights []int) []int {
+	heights := make([]int, len(bricks))
 	collisionMap, width := makeHeightmap(bricks)
 
 	// Drop the bricks one by one.
@@ -76,11 +75,11 @@ func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[int]int)
 			distance = min(distance, cube.z-h)
 		}
 
-		blockHeight := b1.start.z - distance
+		blockHeight := b1.startZ - distance
 
 		// Check if the dropped height of b1 is the same as the expected height.
 		if len(checkHeights) > 0 {
-			if h, ok := checkHeights[b1.id]; !ok || h != blockHeight {
+			if h := checkHeights[b1.id]; h > 0 && h != blockHeight {
 				return nil
 			}
 		}
@@ -102,16 +101,16 @@ func calculateDroppedHeights(bricks []Brick, skip int, checkHeights map[int]int)
 }
 
 // makeHeightmap returns a 1D grid of voxels.
-func makeHeightmap(bricks []Brick) (map[int]int, int) {
+func makeHeightmap(bricks []Brick) ([]int, int) {
 	// Find max of X.
 	maxX := 0
 	for _, brick := range bricks {
-		maxX = max(maxX, brick.end.x)
+		maxX = max(maxX, brick.endX)
 	}
 	width := maxX + 1
 
 	// Create the 1D grid.
-	heightmap := make(map[int]int, width*width) // Assume square.
+	heightmap := make([]int, width*width) // Assume square.
 	for y := 0; y < width; y++ {
 		for x := 0; x < width; x++ {
 			heightmap[y*width+x] = 0
@@ -124,25 +123,28 @@ func makeHeightmap(bricks []Brick) (map[int]int, int) {
 // Part 1.
 
 func part1() int {
-	// Parse the bricks.
-	bricksRe := regexp.MustCompile(`(?m)^(\d+).*(\d+),(\d+)~(\d+),(\d+),(\d+)`)
-	bricks := make([]Brick, 0)
-	nextId := 1
-	for _, match := range bricksRe.FindAllStringSubmatch(strings.TrimSpace(data), -1) {
+	lines := strings.Split(strings.TrimSpace(data), "\n")
+	bricks := make([]Brick, 0, 1300)
+	nextId := 0
+	for _, line := range lines {
+		match := strings.FieldsFunc(line, func(r rune) bool { return r == ',' || r == '~' })
 		brick := Brick{
 			nextId,
-			Voxel{nextId, Atoi(match[1]), Atoi(match[2]), Atoi(match[3])},
-			Voxel{nextId, Atoi(match[4]), Atoi(match[5]), Atoi(match[6])},
-			nil,
-		}
+			Atoi(match[2]),
+			Atoi(match[3]),
+			Cubes(
+				nextId,
+				Atoi(match[0]), Atoi(match[1]), Atoi(match[2]),
+				Atoi(match[3]), Atoi(match[4]), Atoi(match[5]),
+			)}
+
 		nextId++
-		brick.cubes = Cubes(&brick)
 		bricks = append(bricks, brick)
 	}
 
 	// Sort from bottom to top.
 	sort.Slice(bricks, func(i, j int) bool {
-		return bricks[i].start.z < bricks[j].start.z
+		return bricks[i].startZ < bricks[j].startZ
 	})
 
 	// Calculate the heights of the bricks after dropping.
