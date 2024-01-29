@@ -182,7 +182,7 @@ func part2() int {
 	counts := [2]int{}
 	visited := make(bitmap.Bitmap, 0, 34000000)
 	goalSteps := 26501365
-	yForX := make(map[int]int, 3)
+	yForX := [3]int{}
 
 	queues[0] = append(queues[0], toID(start, start))
 	for steps := 0; steps <= 3*width; steps++ {
@@ -201,7 +201,7 @@ func part2() int {
 		isPointOnCurve := (steps-start)%width == 0
 		if isPointOnCurve {
 			yForX[steps/width] = counts[parity]
-			if len(yForX) == 3 {
+			if steps/width >= 2 {
 				break
 			}
 		}

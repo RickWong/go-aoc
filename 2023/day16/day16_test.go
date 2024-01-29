@@ -26,7 +26,7 @@ type Beam struct {
 	dy, dx int
 }
 
-type LUT map[int]struct{}
+type LUT []int
 
 // Helper functions.
 
@@ -34,7 +34,7 @@ func traceBeam(grid [][]byte, beam Beam) LUT {
 	history := make(map[Beam]bool, 1024)
 	height := len(grid)
 	width := len(grid[0])
-	lut := make(map[int]struct{}, height*width)
+	lut := make(LUT, height*width)
 
 	beams := deque.NewDeque[Beam](deque.WithChunkSize(1024))
 	beams.PushBack(beam)
@@ -53,7 +53,7 @@ func traceBeam(grid [][]byte, beam Beam) LUT {
 				break
 			}
 
-			lut[y*width+x] = struct{}{}
+			lut[y*width+x] = 1
 
 			tile := grid[y][x]
 			if tile == '|' {
@@ -94,7 +94,7 @@ func part1() int {
 	grid := common.Map(lines, func(line string) []byte { return []byte(line) })
 
 	lut := traceBeam(grid, Beam{0, -1, 0, 1})
-	sum := len(lut)
+	sum := common.Sum(lut)
 
 	return sum
 }
@@ -138,7 +138,7 @@ func part2() int {
 			lut := traceBeam(grid, beam)
 			mu.Lock()
 			defer mu.Unlock()
-			sum = max(sum, len(lut))
+			sum = max(sum, common.Sum(lut))
 			return nil
 		})
 	}
