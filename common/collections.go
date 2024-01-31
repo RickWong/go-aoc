@@ -40,3 +40,11 @@ func Map2[T, R any](list []T, fn func(a T, i int) R) []R {
 	}
 	return m
 }
+
+func Chunk[T any](list []T, size int) [][]T {
+	var chunks [][]T
+	for size < len(list) {
+		list, chunks = list[size:], append(chunks, list[0:size:size])
+	}
+	return append(chunks, list)
+}
