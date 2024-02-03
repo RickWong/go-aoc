@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
+	"math"
 	"regexp"
 	"strings"
 	"testing"
@@ -20,29 +21,42 @@ var data = Input
 // Data types.
 
 type Vec2 struct {
-	x, y float64
+	X, Y float64
 }
 
 type Vec3 struct {
-	x, y, z float64
+	X, Y, Z float64
 }
 
 type Hailstone struct {
-	pos Vec3
-	vel Vec3
+	P Vec3
+	V Vec3
 }
 
 // Helper functions.
 
+func parse() []Hailstone {
+	hailstones := make([]Hailstone, 0, strings.Count(data, "\n")+1)
+
+	re := regexp.MustCompile(`(?m)^(\d+), +(\d+), +(\d+) +@ +(-?\d+), +(-?\d+), +(-?\d+)`)
+	for _, match := range re.FindAllStringSubmatch(data, -1) {
+		px, py, pz := common.Atof(match[1]), common.Atof(match[2]), common.Atof(match[3])
+		vx, vy, vz := common.Atof(match[4]), common.Atof(match[5]), common.Atof(match[6])
+		hailstones = append(hailstones, Hailstone{Vec3{px, py, pz}, Vec3{vx, vy, vz}})
+	}
+
+	return hailstones
+}
+
 func CollisionPointInFuture(h1, h2 Hailstone) (Vec2, bool) {
-	x1 := h1.pos.x - 0*h1.vel.x
-	y1 := h1.pos.y - 0*h1.vel.y
-	x2 := h1.pos.x + 1*h1.vel.x
-	y2 := h1.pos.y + 1*h1.vel.y
-	x3 := h2.pos.x - 0*h2.vel.x
-	y3 := h2.pos.y - 0*h2.vel.y
-	x4 := h2.pos.x + 1*h2.vel.x
-	y4 := h2.pos.y + 1*h2.vel.y
+	x1 := h1.P.X - 0*h1.V.X
+	y1 := h1.P.Y - 0*h1.V.Y
+	x2 := h1.P.X + 1*h1.V.X
+	y2 := h1.P.Y + 1*h1.V.Y
+	x3 := h2.P.X - 0*h2.V.X
+	y3 := h2.P.Y - 0*h2.V.Y
+	x4 := h2.P.X + 1*h2.V.X
+	y4 := h2.P.Y + 1*h2.V.Y
 
 	nominator := (x4-x3)*(y1-y3) - (y4-y3)*(x1-x3)
 	denominator := (y4-y3)*(x2-x1) - (x4-x3)*(y2-y1)
@@ -57,19 +71,32 @@ func CollisionPointInFuture(h1, h2 Hailstone) (Vec2, bool) {
 	return Vec2{x, y}, true
 }
 
+func CollisionTime(h1, h2, h3 Hailstone) float64 {
+	x1, y1, z1, vx1, vy1, vz1 := h1.P.X, h1.P.Y, h1.P.Z, h1.V.X, h1.V.Y, h1.V.Z
+	x2, y2, z2, vx2, vy2, vz2 := h2.P.X, h2.P.Y, h2.P.Z, h2.V.X, h2.V.Y, h2.V.Z
+	x3, y3, z3, vx3, vy3, vz3 := h3.P.X, h3.P.Y, h3.P.Z, h3.V.X, h3.V.Y, h3.V.Z
+
+	yz := y1*(z2-z3) + y2*(-z1+z3) + y3*(z1-z2)
+	xz := x1*(-z2+z3) + x2*(z1-z3) + x3*(-z1+z2)
+	xy := x1*(y2-y3) + x2*(-y1+y3) + x3*(y1-y2)
+
+	vxvy := vx1*(vy2-vy3) + vx2*(-vy1+vy3) + vx3*(vy1-vy2)
+	vxvz := vx1*(-vz2+vz3) + vx2*(vz1-vz3) + vx3*(-vz1+vz2)
+	vyvz := vy1*(vz2-vz3) + vy2*(-vz1+vz3) + vy3*(vz1-vz2)
+
+	nominator := (vx2-vx3)*yz + (vy2-vy3)*xz + (vz2-vz3)*xy
+	denominator := (z2-z3)*vxvy + (y2-y3)*vxvz + (x2-x3)*vyvz
+
+	return nominator / denominator
+}
+
 // Part 1.
 
 func part1() int {
-	hailstones := make([]Hailstone, 0, strings.Count(data, "\n")+1)
+	hailstones := parse()
 
-	re := regexp.MustCompile(`(?m)^(\d+), +(\d+), +(\d+) +@ +(-?\d+), +(-?\d+), +(-?\d+)`)
-	for _, match := range re.FindAllStringSubmatch(data, -1) {
-		px, py, pz := common.Atof(match[1]), common.Atof(match[2]), common.Atof(match[3])
-		vx, vy, vz := common.Atof(match[4]), common.Atof(match[5]), common.Atof(match[6])
-		hailstones = append(hailstones, Hailstone{Vec3{px, py, pz}, Vec3{vx, vy, vz}})
-	}
-
-	field := []float64{200000000000000, 400000000000000}
+	start := float64(200000000000000)
+	end := float64(400000000000000)
 	sum := 0
 	for i := 0; i < len(hailstones); i++ {
 		for j := i + 1; j < len(hailstones); j++ {
@@ -79,20 +106,20 @@ func part1() int {
 			if !collides {
 				continue
 			}
-			if collision.x < field[0] || collision.x > field[1] ||
-				collision.y < field[0] || collision.y > field[1] {
+			if collision.X < start || collision.X > end ||
+				collision.Y < start || collision.Y > end {
 				continue
 			}
-			if a.vel.x > 0 && collision.x < a.pos.x {
+			if a.V.X > 0 && collision.X < a.P.X {
 				continue
 			}
-			if b.vel.x > 0 && collision.x < b.pos.x {
+			if b.V.X > 0 && collision.X < b.P.X {
 				continue
 			}
-			if a.vel.x < 0 && collision.x > a.pos.x {
+			if a.V.X < 0 && collision.X > a.P.X {
 				continue
 			}
-			if b.vel.x < 0 && collision.x > b.pos.x {
+			if b.V.X < 0 && collision.X > b.P.X {
 				continue
 			}
 			sum++
@@ -117,7 +144,24 @@ func TestPart1(t *testing.T) {
 // Part 2.
 
 func part2() int {
-	return 0
+	hailstones := parse()
+
+	t1 := CollisionTime(hailstones[0], hailstones[1], hailstones[2])
+	t2 := CollisionTime(hailstones[1], hailstones[0], hailstones[2])
+
+	p1, p2 := hailstones[0].P, hailstones[1].P
+	v1, v2 := hailstones[0].V, hailstones[1].V
+
+	c1 := Vec3{p1.X + t1*v1.X, p1.Y + t1*v1.Y, p1.Z + t1*v1.Z}
+	c2 := Vec3{p2.X + t2*v2.X, p2.Y + t2*v2.Y, p2.Z + t2*v2.Z}
+	v0 := Vec3{(c2.X - c1.X) / (t2 - t1), (c2.Y - c1.Y) / (t2 - t1), (c2.Z - c1.Z) / (t2 - t1)}
+
+	rock := Hailstone{
+		Vec3{p1.X + (v1.X*t1 - v0.X*t1), p1.Y + (v1.Y*t1 - v0.Y*t1), p1.Z + (v1.Z*t1 - v0.Z*t1)},
+		v0,
+	}
+
+	return int(math.Round(rock.P.X + rock.P.Y + rock.P.Z))
 }
 
 func TestPart2(t *testing.T) {
@@ -128,7 +172,7 @@ func TestPart2(t *testing.T) {
 	if data == Example {
 		assert.Equal(t, 82000210, result)
 	} else {
-		assert.Equal(t, 357134560737, result)
+		assert.Equal(t, 1007148211789625, result)
 	}
 }
 
