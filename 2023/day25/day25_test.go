@@ -2,9 +2,11 @@ package day25
 
 import (
 	_ "embed"
+	"github.com/RickWong/go-aoc/common"
 	"github.com/stretchr/testify/assert"
-	graph2 "github.com/twmb/algoimpl/go/graph"
+	"github.com/twmb/algoimpl/go/graph"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -24,41 +26,33 @@ var data = Input
 // Part 1.
 
 func part1() int {
-	nodes := make(map[string]graph2.Node, 1000)
-	graph := graph2.New(graph2.Undirected)
+	components := make(map[string]graph.Node, 2000)
+	group := graph.New(graph.Undirected)
 
 	re := regexp.MustCompile(`(?m)(\w+): (.+)$`)
 	for _, match := range re.FindAllStringSubmatch(data, -1) {
-		if _, ok := nodes[match[1]]; !ok {
-			nodes[match[1]] = graph.MakeNode()
+		if _, ok := components[match[1]]; !ok {
+			components[match[1]] = group.MakeNode()
 		}
 
 		for _, connection := range strings.Fields(match[2]) {
-			if _, ok := nodes[connection]; !ok {
-				nodes[connection] = graph.MakeNode()
+			if _, ok := components[connection]; !ok {
+				components[connection] = group.MakeNode()
 			}
 
-			_ = graph.MakeEdgeWeight(nodes[match[1]], nodes[connection], 1)
-			//_ = graph.MakeEdge(nodes[connection], nodes[match[1]])
+			_ = group.MakeEdgeWeight(components[match[1]], components[connection], 1)
 		}
 	}
 
-	for key, node := range nodes {
-		*node.Value = key
-	}
-
-	cuts := graph.RandMinimumCut(1000, 10)
+	cuts := group.RandMinimumCut(len(components)/4, runtime.NumCPU())
 	for _, cut := range cuts {
-		graph.RemoveEdge(cut.Start, cut.End)
+		group.RemoveEdge(cut.Start, cut.End)
 	}
 
-	cycles := graph.StronglyConnectedComponents()
-	ret := 1
-	for _, cycle := range cycles {
-		ret *= len(cycle)
-	}
-
-	return ret
+	return common.Product(common.Map(
+		group.StronglyConnectedComponents(),
+		func(components []graph.Node) int { return len(components) },
+	))
 }
 
 func TestPart1(t *testing.T) {
@@ -76,7 +70,7 @@ func TestPart1(t *testing.T) {
 // Part 2.
 
 func part2() int {
-	return 0
+	return -1
 }
 
 func TestPart2(t *testing.T) {
@@ -85,9 +79,9 @@ func TestPart2(t *testing.T) {
 	result := part2()
 
 	if data == Example {
-		assert.Equal(t, 82000210, result)
+		assert.Equal(t, -1, result)
 	} else {
-		assert.Equal(t, 357134560737, result)
+		assert.Equal(t, -1, result)
 	}
 }
 

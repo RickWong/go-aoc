@@ -308,7 +308,7 @@ func part2() int {
 			)
 
 			results[i] = result.BestWeight
-			println("result", result.BestWeight)
+			//println("result", result.BestWeight)
 			return nil
 		})
 	}
