@@ -1,6 +1,10 @@
-# Go: Advent of Code
+# Advent of Code in Go
 
-Fast and simple Advent of Code solutions written in Go.
+Fast and simple Advent of Code solutions written in Go. First make it work, then make it right, then make it fast. Going for all puzzles < 1s.
+
+| Year | Stars | Runtime |
+|---|---:|---:|
+| 2023 | 50 | 0.514 s |
 
 ## Installation
 
