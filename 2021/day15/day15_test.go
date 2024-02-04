@@ -38,11 +38,11 @@ func part1() int {
 		func(p *Position) bool {
 			return p == end
 		},
-		func(p *Position) any {
-			return p.y*1000 + p.x
+		func(p *Position) int {
+			return (p.y << 16) + p.x
 		},
-		func(p *Position) float64 {
-			return float64(p.risk)
+		func(p *Position, curWeight float64) float64 {
+			return curWeight + float64(p.risk)
 		},
 		func(p *Position) float64 {
 			return math.Abs(float64(end.y-p.y)) +
@@ -50,6 +50,7 @@ func part1() int {
 		},
 		0,
 		true,
+		false,
 	)
 
 	return lo.Sum(lo.Map(result.BestPath[1:], func(p *Position, _ int) int {
@@ -97,7 +98,7 @@ func TestPart1(t *testing.T) {
 	result := part1()
 	expect := 40
 	if data == Input {
-		expect = 595
+		expect = 540
 	}
 
 	if result != expect {
@@ -119,11 +120,11 @@ func part2() int {
 		func(p *Position) bool {
 			return p == end
 		},
-		func(p *Position) any {
-			return p.y*1000 + p.x
+		func(p *Position) int {
+			return (p.y << 16) + p.x
 		},
-		func(p *Position) float64 {
-			return float64(p.risk)
+		func(p *Position, curWeight float64) float64 {
+			return curWeight + float64(p.risk)
 		},
 		func(p *Position) float64 {
 			return math.Abs(float64(end.y-p.y)) +
@@ -131,6 +132,7 @@ func part2() int {
 		},
 		0,
 		true,
+		false,
 	)
 
 	return lo.Sum(lo.Map(result.BestPath[1:], func(p *Position, _ int) int {
@@ -142,7 +144,7 @@ func TestPart2(t *testing.T) {
 	result := part2()
 	expect := 315
 	if data == Input {
-		expect = 2914
+		expect = 2879
 	}
 
 	if result != expect {

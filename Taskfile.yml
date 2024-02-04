@@ -33,23 +33,29 @@ tasks:
   dev:
     sources: ["**/*.go"]
     watch: true
+    method: none
     cmds: 
       - task: devtest
 
   test:
     cmds:
-      - gotest -v ./...
+      - gotest -count=1 ./...
 
   devtest:
     sources: ["**/*.go"]
     watch: true
+    method: none
     cmds:
-      - gotest -v ./...
+      - gotest -count=1 -failfast ./...
 
   coverage:
     deps: [format, lint, test]
     cmds:
-      - gotest -v ./... -coverprofile .coverage.out     
+      - gotest -count=1 ./... -coverprofile .coverage.out
+
+  bench:
+    cmds:
+      - gobench ./...
 
   build:
-    deps: [format, lint, test, coverage]
+    deps: [format, lint, test]

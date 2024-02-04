@@ -17,9 +17,6 @@ brew install go
 # install go-task
 go install github.com/go-task/task/v3/cmd/task@latest
 
-# install go-releaser
-go install github.com/goreleaser/goreleaser@latest
-
 # install gotest 
 go install github.com/rakyll/gotest
 
@@ -39,9 +36,6 @@ task build
 ## Usage
 
 ```sh
-# run once
-task start
-
 # run with automatic restarts
 task dev
 

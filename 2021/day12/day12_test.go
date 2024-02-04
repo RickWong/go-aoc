@@ -32,7 +32,7 @@ func part1() int {
 	caves := parseCaves(lines)
 	ends := 0
 
-	utils.IterativeSearch(
+	utils.IterativeSearch[Route, int, int](
 		&Route{caves["start"], caves["start"].id, false},
 		func(current *Route) []*Route {
 			routes := make([]*Route, 0, len(current.cave.tunnels))
@@ -120,7 +120,7 @@ func part2() int {
 	caves := parseCaves(lines)
 	ends := 0
 
-	utils.IterativeSearch(
+	utils.IterativeSearch[Route, int, int](
 		&Route{caves["start"], caves["start"].id, false},
 		func(current *Route) []*Route {
 			routes := make([]*Route, 0, len(current.cave.tunnels))

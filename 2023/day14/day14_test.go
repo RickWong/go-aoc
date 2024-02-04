@@ -21,7 +21,8 @@ var data = Input
 
 // Helper functions.
 
-func printAndSum(grid [][]byte) int {
+//lint:ignore U1000
+func _printAndSum(grid [][]byte) int {
 	sum := 0
 	for y := range grid {
 		for x := range grid[y] {

@@ -7,6 +7,10 @@ import (
 
 // LCM returns the least common multiple of the integers.
 func LCM(integers ...int) int {
+	if len(integers) < 1 {
+		return 0
+	}
+
 	if len(integers) < 2 {
 		return integers[0]
 	}

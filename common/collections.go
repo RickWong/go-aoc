@@ -11,8 +11,9 @@ func AllValues[K Hashable, V comparable](c map[K]V, eq any) bool {
 
 // Reset resets the slice to be empty but keeps the capacity.
 func Reset[T any](c *[]T) {
-	capacity := cap(*c)
-	*c = (*c)[:0:capacity]
+	if c != nil && len(*c) > 0 {
+		*c = (*c)[:0:cap(*c)]
+	}
 }
 
 func Filter[T any](list []T, fn func(a T) bool) []T {
