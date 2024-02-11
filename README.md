@@ -11,14 +11,11 @@ Fast and simple Advent of Code solutions written in Go. First make it work, then
 ```sh
 # get brew from https://brew.sh
 
-# install go
-brew install go
+# install go, just, watchexec
+brew install go just watchexec
 
-# install go-task
-go install github.com/go-task/task/v3/cmd/task@latest
-
-# install gotest 
-go install github.com/rakyll/gotest
+# install gotestsum
+go install gotest.tools/gotestsum@latest
 
 # install gobench
 go install github.com/gobench-io/gobench@master

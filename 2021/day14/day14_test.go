@@ -40,6 +40,8 @@ func part1() int {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 1588
 	if data == Input {
@@ -102,6 +104,8 @@ func parseRules(sections []string) map[string]string {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 2188189693529
 	if data == Input {

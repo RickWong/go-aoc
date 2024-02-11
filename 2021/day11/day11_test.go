@@ -103,6 +103,8 @@ func parseOctopi(lines []string) []*Octopus {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 1656
 	if data == input {
@@ -152,6 +154,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 195
 	if data == input {

@@ -95,6 +95,8 @@ func parseGrid(lines []string, repeat int) []*Position {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 40
 	if data == Input {
@@ -141,6 +143,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 315
 	if data == Input {

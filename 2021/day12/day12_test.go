@@ -104,6 +104,8 @@ func parseCaves(lines []string) map[string]*Cave {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 226
 	if data == Input {
@@ -164,6 +166,8 @@ func part2() int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 3509
 	if data == Input {

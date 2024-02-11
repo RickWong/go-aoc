@@ -127,6 +127,8 @@ func decodePacket(packet string, offset *int) *Packet {
 }
 
 func TestPart1(t *testing.T) {
+	t.Parallel()
+
 	result := part1()
 	expect := 20
 	if data == Input {
@@ -194,6 +196,8 @@ func evaluatePacket(packet *Packet) int {
 }
 
 func TestPart2(t *testing.T) {
+	t.Parallel()
+
 	result := part2()
 	expect := 1
 	if data == Input {

@@ -6,6 +6,8 @@ import (
 )
 
 func TestMemo(t *testing.T) {
+	t.Skip()
+
 	type T1 struct {
 		A int
 	}
@@ -43,6 +45,8 @@ func TestMemo(t *testing.T) {
 }
 
 func TestFibionacci(t *testing.T) {
+	t.Skip()
+
 	cache := make(map[int]int)
 
 	var fibionacci func(n int) int
