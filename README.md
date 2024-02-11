@@ -3,62 +3,51 @@
 Fast and simple Advent of Code solutions written in Go. First make it work, then make it right, then make it fast. Going for all puzzles < 1s.
 
 | Year | Stars | Runtime |
-|---|---:|---:|
-| 2023 | 50 | 0.514 s |
+|------|------:|--------:|
+| 2021 |    15 |  0.22 s |
+| 2023 |    50 |  0.84 s |
 
 ## Installation
 
 ```sh
 # get brew from https://brew.sh
 
-# install go, just, watchexec
-brew install go just watchexec
+# install just
+brew install just
 
-# install gotestsum
-go install gotest.tools/gotestsum@latest
-
-# install gobench
-go install github.com/gobench-io/gobench@master
-
-# install golangci-lint
-go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.55.2
-
-# install nilaway
-go install go.uber.org/nilaway/cmd/nilaway@latest
+# install dependencies
+just install
 
 # build project
-task build
+just build
 ```
 
 ## Usage
 
 ```sh
 # run with automatic restarts
-task dev
+just dev
 
 # run tests with just once
-task test
+just test
 
 # run tests with automatic restarts
-task devtest
+just devtest
 
 # debug on port 5678 with automatic restarts
-task debug
+just debug
 
 # format all the code
-task format
+just format
 
 # typecheck all the code
-task typecheck
+just typecheck
 
 # lint all the code (lints are extra rules agreed upon by the team)
-task lint
+just lint
 
 # audit all the code
-task audit
-
-# run all build steps: lint, format, typecheck, audit, test and coverage
-task build
+just audit
 ```
 
 ## VS Code extensions
