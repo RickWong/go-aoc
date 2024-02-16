@@ -2,10 +2,11 @@ package day07
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
 )
 
 //go:embed example.txt

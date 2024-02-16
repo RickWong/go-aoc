@@ -2,11 +2,12 @@ package day10
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
-	stack2 "github.com/zyedidia/generic/stack"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
+	stack2 "github.com/zyedidia/generic/stack"
 )
 
 //go:embed example.txt

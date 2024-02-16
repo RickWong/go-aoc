@@ -2,12 +2,13 @@ package day15
 
 import (
 	_ "embed"
-	utils "github.com/RickWong/go-aoc/common"
-	"github.com/samber/lo"
 	"math"
 	"strconv"
 	"strings"
 	"testing"
+
+	utils "github.com/RickWong/go-aoc/common"
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt

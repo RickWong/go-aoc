@@ -2,11 +2,12 @@ package day11
 
 import (
 	_ "embed"
-	"github.com/kelindar/bitmap"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"strings"
 	"testing"
+
+	"github.com/kelindar/bitmap"
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt

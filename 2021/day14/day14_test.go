@@ -2,10 +2,11 @@ package day14
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
 	"maps"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt

@@ -2,10 +2,11 @@ package day04
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
 	"regexp"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt

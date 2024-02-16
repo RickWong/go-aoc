@@ -2,12 +2,13 @@ package day12
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/sync/errgroup"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed example.txt

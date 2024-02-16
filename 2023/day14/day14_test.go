@@ -2,11 +2,12 @@ package day14
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
 	"hash/crc32"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt
@@ -29,9 +30,9 @@ func _printAndSum(grid [][]byte) int {
 			if grid[y][x] == 'O' {
 				sum += len(grid) - y
 			}
-			//print(grid[y][x])
+			// print(grid[y][x])
 		}
-		//println()
+		// println()
 	}
 	return sum
 }
@@ -217,7 +218,7 @@ func TestPart2(t *testing.T) {
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		//part1()
+		// part1()
 		part2()
 	}
 }

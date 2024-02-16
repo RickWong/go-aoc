@@ -2,12 +2,13 @@ package day20
 
 import (
 	_ "embed"
-	. "github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/exp/maps"
 	"regexp"
 	"strings"
 	"testing"
+
+	. "github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/exp/maps"
 )
 
 //go:embed example.txt

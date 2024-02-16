@@ -2,10 +2,11 @@ package day10
 
 import (
 	_ "embed"
-	"github.com/kelindar/bitmap"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/kelindar/bitmap"
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt
@@ -219,7 +220,7 @@ func part2() int {
 				}
 			}
 		}
-		//println("row", y, "has", m, "inside", corner)
+		// println("row", y, "has", m, "inside", corner)
 		n += m
 	}
 

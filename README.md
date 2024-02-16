@@ -61,6 +61,7 @@ just audit
 ## GoLand plugins
 
 - GitHub Copilot
+- Just
 - Rainbow Brackets
 - Tabnine AI
 

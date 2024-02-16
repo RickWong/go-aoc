@@ -6,6 +6,7 @@ install:
     brew install go just jq watchexec
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
     go install gotest.tools/gotestsum@latest
+    go install mvdan.cc/gofumpt@latest
     go install github.com/gobench-io/gobench@master
     go install go.uber.org/nilaway/cmd/nilaway@latest
 
@@ -13,7 +14,7 @@ build: format lint test
     go build -n ./...
 
 format:
-    go fmt ./...
+    gofumpt -l -w .
     go mod tidy
 
 lint:

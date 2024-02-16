@@ -2,12 +2,13 @@ package day13
 
 import (
 	_ "embed"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/sync/errgroup"
 	"slices"
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed example.txt

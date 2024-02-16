@@ -2,9 +2,10 @@ package day12
 
 import (
 	_ "embed"
-	utils "github.com/RickWong/go-aoc/common"
 	"strings"
 	"testing"
+
+	utils "github.com/RickWong/go-aoc/common"
 )
 
 //go:embed example.txt
@@ -50,9 +51,11 @@ func part1() int {
 					current.visited&next.id == 0 {
 					routes = append(
 						routes,
-						&Route{next,
+						&Route{
+							next,
 							current.visited | next.id,
-							false},
+							false,
+						},
 					)
 				}
 			}

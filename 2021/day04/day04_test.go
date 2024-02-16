@@ -2,10 +2,11 @@ package day04
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
 )
 
 //go:embed example.txt
@@ -175,5 +176,4 @@ func TestPart2(t *testing.T) {
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
-
 }

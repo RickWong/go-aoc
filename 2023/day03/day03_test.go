@@ -2,10 +2,11 @@ package day03
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
 	"strings"
 	"testing"
 	"unicode"
+
+	"github.com/RickWong/go-aoc/common"
 )
 
 //go:embed example.txt
@@ -111,7 +112,6 @@ func TestPart1(t *testing.T) {
 }
 
 func part2() int {
-
 	lines := strings.Split(data, "\n")
 	sum := 0
 

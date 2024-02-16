@@ -2,12 +2,13 @@ package day21
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/kelindar/bitmap"
-	"github.com/stretchr/testify/assert"
 	"math"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/kelindar/bitmap"
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt
@@ -230,7 +231,7 @@ func TestPart2(t *testing.T) {
 
 func BenchmarkAll(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		//part1()
+		// part1()
 		part2()
 	}
 }

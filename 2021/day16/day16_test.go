@@ -4,11 +4,12 @@ import (
 	_ "embed"
 	"encoding/hex"
 	"fmt"
-	"github.com/samber/lo"
-	"github.com/zyedidia/generic/stack"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
+	"github.com/zyedidia/generic/stack"
 )
 
 //go:embed example.txt

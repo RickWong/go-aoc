@@ -2,13 +2,14 @@ package day16
 
 import (
 	_ "embed"
+	"strings"
+	"sync"
+	"testing"
+
 	"github.com/RickWong/go-aoc/common"
 	"github.com/edwingeng/deque/v2"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/sync/errgroup"
-	"strings"
-	"sync"
-	"testing"
 )
 
 //go:embed example.txt

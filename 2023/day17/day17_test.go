@@ -2,10 +2,11 @@ package day17
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt

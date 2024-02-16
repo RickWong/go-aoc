@@ -2,11 +2,12 @@ package day08
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
 	"math/bits"
 	"slices"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt
@@ -17,8 +18,10 @@ var input string
 
 var data = input
 
-type Segment rune
-type Signal uint
+type (
+	Segment rune
+	Signal  uint
+)
 
 var segmentToSignal = map[Segment]Signal{
 	'a': 0b0000001,

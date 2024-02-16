@@ -2,10 +2,11 @@ package day11
 
 import (
 	_ "embed"
-	queue2 "github.com/zyedidia/generic/queue"
 	"strconv"
 	"strings"
 	"testing"
+
+	queue2 "github.com/zyedidia/generic/queue"
 )
 
 //go:embed example.txt

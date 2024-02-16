@@ -2,15 +2,16 @@ package day23
 
 import (
 	_ "embed"
+	"runtime"
+	"slices"
+	"strings"
+	"testing"
+
 	"github.com/RickWong/go-aoc/common"
 	"github.com/edwingeng/deque/v2"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/exp/maps"
 	"golang.org/x/sync/errgroup"
-	"runtime"
-	"slices"
-	"strings"
-	"testing"
 )
 
 //go:embed example.txt
@@ -308,7 +309,7 @@ func part2() int {
 			)
 
 			results[i] = result.BestWeight
-			//println("result", result.BestWeight)
+			// println("result", result.BestWeight)
 			return nil
 		})
 	}

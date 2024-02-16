@@ -1,9 +1,10 @@
 package common
 
 import (
-	jsoniter "github.com/json-iterator/go"
 	"hash/fnv"
 	"strconv"
+
+	jsoniter "github.com/json-iterator/go"
 )
 
 // Memo is a generic memoization function that accepts 1 comparable argument.

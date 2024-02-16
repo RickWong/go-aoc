@@ -2,11 +2,12 @@ package day09
 
 import (
 	_ "embed"
-	"github.com/samber/lo"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt

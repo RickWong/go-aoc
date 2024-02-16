@@ -2,14 +2,15 @@ package day22
 
 import (
 	_ "embed"
-	. "github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/sync/errgroup"
 	"runtime"
 	"sort"
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	. "github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed example.txt
@@ -47,7 +48,8 @@ func parseBricks() []Brick {
 			Voxels(
 				Atoi(match[0]), Atoi(match[1]), Atoi(match[2]),
 				Atoi(match[3]), Atoi(match[4]), Atoi(match[5]),
-			)}
+			),
+		}
 		bricks = append(bricks, brick)
 		nextId++
 	}

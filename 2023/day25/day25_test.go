@@ -2,13 +2,14 @@ package day25
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/stretchr/testify/assert"
-	"github.com/twmb/algoimpl/go/graph"
 	"regexp"
 	"runtime"
 	"strings"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/stretchr/testify/assert"
+	"github.com/twmb/algoimpl/go/graph"
 )
 
 //go:embed example.txt

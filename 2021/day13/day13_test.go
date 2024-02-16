@@ -3,10 +3,11 @@ package day13
 import (
 	_ "embed"
 	"fmt"
-	"github.com/samber/lo"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/samber/lo"
 )
 
 //go:embed example.txt

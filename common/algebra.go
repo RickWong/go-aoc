@@ -1,8 +1,9 @@
 package common
 
 import (
-	"golang.org/x/exp/constraints"
 	"math"
+
+	"golang.org/x/exp/constraints"
 )
 
 // LCM returns the least common multiple of the integers.

@@ -133,5 +133,4 @@ func TestPart2(t *testing.T) {
 	if result != expect {
 		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
 	}
-
 }

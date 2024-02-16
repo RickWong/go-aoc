@@ -2,14 +2,15 @@ package day05
 
 import (
 	_ "embed"
-	"github.com/RickWong/go-aoc/common"
-	"github.com/samber/lo"
-	"golang.org/x/sync/errgroup"
 	"regexp"
 	"runtime"
 	"strings"
 	"sync/atomic"
 	"testing"
+
+	"github.com/RickWong/go-aoc/common"
+	"github.com/samber/lo"
+	"golang.org/x/sync/errgroup"
 )
 
 //go:embed example.txt

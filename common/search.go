@@ -2,9 +2,10 @@ package common
 
 import (
 	"fmt"
-	"github.com/zyedidia/generic/heap"
 	"slices"
 	"time"
+
+	"github.com/zyedidia/generic/heap"
 )
 
 type SearchResult[T any, W Number] struct {
