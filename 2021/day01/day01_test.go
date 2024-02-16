@@ -5,6 +5,8 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 //go:embed example.txt
@@ -34,21 +36,6 @@ func part1() int {
 	return count
 }
 
-func TestPart1(t *testing.T) {
-	t.Parallel()
-
-	// How many measurements are larger than the previous measurement?
-	result := part1()
-	expect := 7
-	if data == input {
-		expect = 1713
-	}
-
-	if result != expect {
-		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
-	}
-}
-
 func part2() int {
 	lines := strings.Split(data, "\n")
 
@@ -70,17 +57,26 @@ func part2() int {
 	return count
 }
 
+func TestPart1(t *testing.T) {
+	t.Parallel()
+
+	result := part1()
+
+	if data == Example {
+		assert.Equal(t, 7, result)
+	} else {
+		assert.Equal(t, 1713, result)
+	}
+}
+
 func TestPart2(t *testing.T) {
 	t.Parallel()
 
-	// How many sums are larger than the previous sum?
 	result := part2()
-	expect := 5
-	if data == input {
-		expect = 1734
-	}
 
-	if result != expect {
-		t.Errorf("Result was incorrect, got: %d, expect: %d.", result, expect)
+	if data == Example {
+		assert.Equal(t, 5, result)
+	} else {
+		assert.Equal(t, 1734, result)
 	}
 }

@@ -1,7 +1,5 @@
 set dotenv-load := true
 
-year := "2023"
-
 install:
     brew install go just jq watchexec
     go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
@@ -27,6 +25,7 @@ typecheck:
 audit:
     not_implemented
 
+year := "2021"
 start:
     go test ./{{year}}/... -count 1 -json | jq 'select(.Test and .Elapsed > 0).Elapsed' | jq -s 'add'
 
@@ -37,13 +36,13 @@ debug:
     not_implemented
 
 test:
-    gotestsum --packages=./{{year}}/... -- -count 1
+    gotestsum ./... -- -count 1
 
 devtest:
-    gotestsum --hide-summary=skipped,output --watch --packages=./{{year}}/...
+    gotestsum --hide-summary=skipped,output --watch -- -count 1
 
 coverage:
-    go test ./{{year}}/... -coverprofile=.coverage.out
+    go test ./... -coverprofile=.coverage.out
 
 bench:
-    gobench ./{{year}}/...
+    gobench ./...
